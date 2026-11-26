@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tir Coach</string>
+    <string name="title_activity_main">Tir Coach</string>
+    <string name="package_name">fr.royvanmil.tircoach</string>
+    <string name="custom_url_scheme">fr.royvanmil.tircoach</string>
+</resources>

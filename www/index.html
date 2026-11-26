@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tir Coach</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <button id="btnRetour" class="icone cache" aria-label="Retour">&#8592;</button>
+    <h1 id="titre">Tir Coach</h1>
+  </header>
+
+  <!-- Écran 1 : liste des séances -->
+  <main id="ecranListe">
+    <button id="btnNouvelle" class="gros">+ Nouvelle séance</button>
+    <div id="listeSeances"></div>
+    <p class="info">Les photos sont enregistrées dans le dossier<br><b>Documents/TirCoach</b> du téléphone.</p>
+  </main>
+
+  <!-- Écran 2 : nouvelle séance -->
+  <main id="ecranNouvelle" class="cache">
+    <label>Date
+      <input type="date" id="champDate">
+    </label>
+    <label>Arme
+      <input type="text" id="champArme" list="listeArmes" placeholder="ex. Glock 17">
+      <datalist id="listeArmes"></datalist>
+    </label>
+    <label>Distance (m)
+      <input type="number" id="champDistance" inputmode="numeric" value="25">
+    </label>
+    <label>Cible
+      <select id="champCible">
+        <option>C50</option>
+        <option>C200</option>
+        <option>TAR</option>
+        <option>Autre</option>
+      </select>
+    </label>
+    <button id="btnCreer" class="gros">Créer la séance</button>
+  </main>
+
+  <!-- Écran 3 : détail d'une séance -->
+  <main id="ecranSeance" class="cache">
+    <div id="resumeSeance" class="carte"></div>
+    <button id="btnPhoto" class="gros">&#128247; Prendre une photo</button>
+    <div id="grillePhotos"></div>
+    <button id="btnSupprimer" class="discret">Supprimer la séance de la liste</button>
+  </main>
+
+  <!-- Photo en grand -->
+  <div id="visionneuse" class="cache">
+    <img id="imageGrande" alt="">
+    <p id="nomGrand"></p>
+  </div>
+
+  <div id="message" class="cache"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
