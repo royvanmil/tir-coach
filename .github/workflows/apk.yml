@@ -31,6 +31,16 @@ jobs:
       - name: Copier le web dans Android
         run: npx cap sync android
 
+      - name: Clé de signature
+        env:
+          KEYSTORE: ${{ secrets.TIRCOACH_KEYSTORE }}
+          PASSWORD: ${{ secrets.TIRCOACH_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > android/app/tircoach.keystore
+            printf 'storeFile=tircoach.keystore\nstorePassword=%s\nkeyAlias=tircoach\nkeyPassword=%s\n' "$PASSWORD" "$PASSWORD" > android/keystore.properties
+          fi
+
       - name: Construire l'APK
         working-directory: android
         run: |
