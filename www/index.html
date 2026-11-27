@@ -67,7 +67,7 @@
       <input type="date" id="champDate">
     </label>
     <label>Lieu
-      <input type="text" id="champLieu" list="listeLieux" placeholder="ex. TAA Eauze">
+      <input type="text" id="champLieu" list="listeLieux" placeholder="ex. le nom de ton club">
       <datalist id="listeLieux"></datalist>
     </label>
     <div>
@@ -329,7 +329,7 @@
     <div id="jFin" class="carte centre cache">
       <div class="compteur" id="jTotal">0 / 50</div>
       <p id="jMot"></p>
-      <input type="text" id="jNom" maxlength="30" placeholder="Ton prénom ou pseudo">
+      <input type="text" id="jNom" maxlength="30" placeholder="Ton prénom ou pseudo" enterkeyhint="done">
       <button id="jEnregistrer" class="gros" style="margin-top:10px;width:100%">Enregistrer mon score</button>
       <button id="jRejouer" class="discret" style="margin-top:10px;width:100%">&#128260; Rejouer</button>
     </div>
@@ -371,7 +371,7 @@
       <p>Les règles et informations affichées (tirs contrôlés, catégories, munitions…) sont un aide-mémoire. Les textes officiels et les portails EDEN, SIA et Service-public.fr font référence.</p>
       <p>Les horaires et les dates des stands peuvent changer : vérifie auprès de ton club.</p>
     </div>
-    <div class="carte demarche">
+    <div class="carte demarche" id="carteMerci">
       <div class="haut">&#128588; Merci</div>
       <p>Le contenu « Apprendre » et les dessins des calibres viennent du site du T.A.A. Eauze.</p>
     </div>

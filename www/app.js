@@ -23,7 +23,10 @@ const CLES = {
 // Base de données intégrée (mise à jour avec l'appli)
 // =====================================================================
 
-const STANDS_BASE = [
+// Le T.A.A. Eauze reste dans le code, caché tant que le club n'a pas donné son accord
+const AFFICHER_TAA = false;
+
+const STANDS_BASE_TOUS = [
   {
     id: 'taa-eauze',
     nom: 'TAA Eauze',
@@ -36,9 +39,11 @@ const STANDS_BASE = [
 ];
 
 // Tirs de contrôle / journées club connus
-const CONTROLES_BASE = ['2026-10-04', '2026-11-07', '2026-12-06', '2027-01-02', '2027-02-07', '2027-03-06',
+const CONTROLES_BASE_TOUS = ['2026-10-04', '2026-11-07', '2026-12-06', '2027-01-02', '2027-02-07', '2027-03-06',
   '2027-04-04', '2027-05-01', '2027-06-06', '2027-07-03', '2027-08-01']
   .map((date) => ({ standId: 'taa-eauze', date, notes: 'Repas du midi possible, sur réservation' }));
+const STANDS_BASE = STANDS_BASE_TOUS.filter((s) => AFFICHER_TAA || s.id !== 'taa-eauze');
+const CONTROLES_BASE = CONTROLES_BASE_TOUS.filter((c) => AFFICHER_TAA || c.standId !== 'taa-eauze');
 const CONTROLES_INFO = {
   'taa-eauze': 'Saison 2026/2027. Sauf changement en raison de manifestations hippiques.'
 };
@@ -585,7 +590,7 @@ function ouvrirFormulaire(modifier) {
   remplirListe('listeLieux', [...tousLesStands().map((s) => s.nom), ...seances.map((s) => s.lieu)]);
   const der = seances[seances.length - 1] || {};
   const s = modifier && seanceActive ? seanceActive
-    : { date: aujourdhui(), lieu: der.lieu || 'TAA Eauze', note: 0, notes: '', controle: false };
+    : { date: aujourdhui(), lieu: der.lieu || '', note: 0, notes: '', controle: false };
   $('champDate').value = s.date;
   $('champLieu').value = s.lieu;
   $('champNotes').value = s.notes;
@@ -1058,7 +1063,7 @@ function tousLesStands() {
 
 function afficherStands() {
   const zone = $('listeStands');
-  zone.innerHTML = '';
+  zone.innerHTML = tousLesStands().length ? '' : '<div class="vide">Aucun stand pour le moment. Ajoute le tien !</div>';
   tousLesStands().forEach((s) => {
     const div = document.createElement('div');
     div.className = 'carte ligneListe';
@@ -1162,6 +1167,11 @@ function afficherControles() {
   try { localStorage.setItem(CLES.standFavori, JSON.stringify(choix)); } catch (e) {}
 
   const zone = $('listeControles');
+  if (!stands.length) {
+    zone.innerHTML = '<div class="vide">Ajoute d\'abord ton stand dans « Stands &amp; ouvertures ».</div>';
+    if (ecran !== 'controles') montrer('controles');
+    return;
+  }
   zone.innerHTML = CONTROLES_INFO[choix] ? `<p class="aide">${html(CONTROLES_INFO[choix])}</p>` : '';
   const liste = controlesDuStand(choix);
   if (!liste.length) zone.innerHTML += '<div class="vide">Aucune date pour ce stand. Ajoute-la ci-dessous.</div>';
@@ -1626,12 +1636,16 @@ if (natif && P.App) {
   P.App.addListener('backButton', () => { if (!retour()) P.App.exitApp(); });
 }
 
+$('carteMerci').classList.toggle('cache', !AFFICHER_TAA);
 $('btnInfos').onclick = () => { depuisMenu = false; montrer('infos'); };
 $('btnPartager').onclick = partagerAppli;
 $('jTir').onclick = tirerJeu;
 $('jCible').onclick = tirerJeu;
 $('jRejouer').onclick = nouvellePartie;
 $('jEnregistrer').onclick = enregistrerScore;
+$('jNom').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !$('jEnregistrer').classList.contains('cache')) { e.preventDefault(); $('jNom').blur(); enregistrerScore(); }
+});
 $('btnExporter').onclick = exporterSauvegarde;
 $('btnRestaurer').onclick = () => $('fichierRestauration').click();
 $('fichierRestauration').onchange = (e) => { if (e.target.files[0]) restaurerSauvegarde(e.target.files[0]); e.target.value = ''; };
