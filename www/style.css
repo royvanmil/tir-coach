@@ -359,3 +359,23 @@ input, select, textarea {
   border: 1px solid var(--bord); color: var(--gris); font-size: 20px;
 }
 .logoInfos { width: 90px; margin: 6px auto 10px; display: block; }
+
+/* ---------- V6 : bienvenue, papiers, partage ---------- */
+#ecranBienvenue {
+  position: fixed; inset: 0; z-index: 40; background: var(--fond); overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: calc(30px + env(safe-area-inset-top)) 22px calc(30px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+.logoBienvenue { width: 120px; }
+.grosMots { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+.grosMots span { font-size: 30px; font-weight: 800; color: var(--or); letter-spacing: 2px; }
+.texteBienvenue { color: var(--texte); margin: 0; }
+.accord { text-align: left; background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; padding: 12px; align-items: flex-start; font-size: 15px; }
+.accord input { flex-shrink: 0; margin-top: 2px; }
+#ecranBienvenue .gros { width: 100%; max-width: 360px; }
+.gros:disabled { opacity: 0.35; }
+.qr { width: 180px; height: 180px; background: #fff; border-radius: 12px; padding: 8px; display: block; margin: 8px auto 0; }
+#listePapiers h2 { margin-bottom: 0; }
+
+.accord { flex: none; width: 100%; max-width: 420px; }

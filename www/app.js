@@ -12,7 +12,9 @@ const CLES = {
   stands: 'tircoach-stands',
   controles: 'tircoach-controles',
   licence: 'tircoach-licence',
-  standFavori: 'tircoach-stand-favori'
+  standFavori: 'tircoach-stand-favori',
+  papiers: 'tircoach-papiers',
+  accord: 'tircoach-accord'
 };
 
 // =====================================================================
@@ -50,6 +52,24 @@ const CALIBRES = [
   { id: 'cal12', nom: 'Calibre 12' },
   { id: 'autre', nom: 'Autre calibre' }
 ];
+const CATEGORIES_PAPIERS = [
+  { id: 'armes', nom: 'Papiers des armes', mois: [2, 1] },
+  { id: 'autorisation', nom: 'Autorisation de détention (préfecture)', mois: [7, 6, 5, 4, 3, 2, 1] },
+  { id: 'assurance', nom: 'Assurance', mois: [2, 1] },
+  { id: 'autre', nom: 'Autre', mois: [2, 1] }
+];
+
+// Pour rire : fausses armes de catégorie A
+const ARMES_POUR_RIRE = [
+  'Lance-roquettes', "Char d'assaut", 'Bazooka', 'Canon de 75', 'Catapulte médiévale', 'Trébuchet',
+  'Sous-marin de poche', "Porte-avions (garé dans le jardin)", 'Missile sol-air', 'Mitrailleuse à confettis',
+  'Pistolet à eau turbo', 'Sabre laser', 'Lance-pierre atomique', 'Bombe à paillettes', 'Fusil à bouchon',
+  'Arc de Cupidon', 'Rouleau à pâtisserie de belle-maman', 'Tong de compétition', 'Tapette à mouches tactique',
+  'Doigt dans le cul'
+];
+
+const PLAY_STORE = 'https://play.google.com/store/apps/details?id=fr.royvanmil.tircoach';
+
 const imageCalibre = (id) => (id && id !== 'autre' ? `images/calibres/${id}.svg` : '');
 
 // Contenu de l'espace Apprendre (repris du site du T.A.A.)
@@ -141,12 +161,15 @@ let armes = charger(CLES.armes, []);
 let munitions = charger(CLES.munitions, []);
 let standsPerso = charger(CLES.stands, []);
 let controles = charger(CLES.controles, []).filter((c) => !String(c.id).startsWith('base-'));
+let papiers = charger(CLES.papiers, []);
 let licence = Object.assign({ numero: '', fin: '', image: '', certificatFin: '', certificatImage: '' }, charger(CLES.licence, {}));
 
 let seanceActive = null;
 let tirActif = null;
 let armeActive = null;
 let standActif = null;
+let papierActif = null;
+let papierEnModification = false;
 let enModification = false;
 let tirEnModification = false;
 let armeEnModification = false;
@@ -177,6 +200,10 @@ function migrerSeances(liste) {
   });
 }
 
+function donneesCompletes() {
+  return { appli: 'Tir Coach', version: 6, date: new Date().toISOString(), seances, armes, munitions, standsPerso, controles, licence, papiers };
+}
+
 async function sauver() {
   try {
     localStorage.setItem(CLES.seances, JSON.stringify(seances));
@@ -185,12 +212,13 @@ async function sauver() {
     localStorage.setItem(CLES.stands, JSON.stringify(standsPerso));
     localStorage.setItem(CLES.controles, JSON.stringify(controles));
     localStorage.setItem(CLES.licence, JSON.stringify(licence));
+    localStorage.setItem(CLES.papiers, JSON.stringify(papiers));
   } catch (e) {}
   if (natif) {
     try {
       await P.Filesystem.writeFile({
         path: FICHIER_DONNEES,
-        data: JSON.stringify({ version: 5, seances, armes, munitions, standsPerso, controles, licence }, null, 2),
+        data: JSON.stringify(donneesCompletes(), null, 2),
         directory: 'DOCUMENTS',
         encoding: 'utf8',
         recursive: true
@@ -348,54 +376,57 @@ function vignette(nom, surSuppression, extraHtml) {
 // Rappels licence / certificat
 // =====================================================================
 
-const DOCUMENTS_A_SUIVRE = [
-  { cle: 'fin', nom: 'licence', id: 100 },
-  { cle: 'certificatFin', nom: 'certificat médical', id: 200 }
-];
+// Toutes les dates de fin à surveiller : licence, certificat et papiers
+function echeances() {
+  const liste = [];
+  if (licence.fin) liste.push({ texte: 'Ta licence', fin: licence.fin, mois: [2, 1], ouvrir: afficherLicence });
+  if (licence.certificatFin) liste.push({ texte: 'Ton certificat médical', fin: licence.certificatFin, mois: [2, 1], ouvrir: afficherLicence });
+  papiers.filter((p) => p.fin).forEach((p) => {
+    const cat = CATEGORIES_PAPIERS.find((c) => c.id === p.categorie) || CATEGORIES_PAPIERS[3];
+    liste.push({ texte: `« ${p.titre || cat.nom} »`, fin: p.fin, mois: cat.mois, ouvrir: () => ouvrirPapier(p.id) });
+  });
+  return liste;
+}
 
 function alertesExpiration() {
   const liste = [];
-  DOCUMENTS_A_SUIVRE.forEach((d) => {
-    const fin = licence[d.cle];
-    if (!fin) return;
-    const j = joursAvant(fin);
-    const le = d.nom === 'licence' ? 'Ta licence' : 'Ton certificat médical';
-    if (j < 0) liste.push({ niveau: 'rouge', texte: `${le} a expiré le ${dateFr(fin)}.` });
-    else if (j <= 31) liste.push({ niveau: 'rouge', texte: `${le} expire le ${dateFr(fin)} (dans ${pluriel(j, 'jour')}).` });
-    else if (j <= 62) liste.push({ niveau: 'orange', texte: `${le} expire le ${dateFr(fin)}.` });
+  echeances().forEach((e) => {
+    const j = joursAvant(e.fin);
+    const debutAlerte = decalerMois(e.fin, -Math.max(...e.mois));
+    if (j < 0) liste.push({ niveau: 'rouge', texte: `${e.texte} a expiré le ${dateFr(e.fin)}.`, ouvrir: e.ouvrir });
+    else if (j <= 31) liste.push({ niveau: 'rouge', texte: `${e.texte} expire le ${dateFr(e.fin)} (dans ${pluriel(j, 'jour')}).`, ouvrir: e.ouvrir });
+    else if (aujourdhui() >= debutAlerte) liste.push({ niveau: 'orange', texte: `${e.texte} expire le ${dateFr(e.fin)}.`, ouvrir: e.ouvrir });
   });
   return liste;
 }
 
 function afficherAlertes() {
-  $('alertes').innerHTML = alertesExpiration()
-    .map((a) => `<div class="alerte ${a.niveau}">&#9888;&#65039; ${html(a.texte)}</div>`).join('');
-  $('alertes').querySelectorAll('.alerte').forEach((el) => { el.onclick = afficherLicence; });
+  const alertes = alertesExpiration();
+  $('alertes').innerHTML = alertes.map((a) => `<div class="alerte ${a.niveau}">&#9888;&#65039; ${html(a.texte)}</div>`).join('');
+  $('alertes').querySelectorAll('.alerte').forEach((el, i) => { el.onclick = alertes[i].ouvrir; });
 }
 
 async function programmerRappels() {
   if (!natif || !P.LocalNotifications) return;
   try {
     const LN = P.LocalNotifications;
-    if (!DOCUMENTS_A_SUIVRE.some((d) => licence[d.cle])) return;
+    const liste = echeances();
+    const enAttente = await LN.getPending();
+    if (enAttente.notifications.length) await LN.cancel({ notifications: enAttente.notifications.map((n) => ({ id: n.id })) });
+    if (!liste.length) return;
     let perm = await LN.checkPermissions();
     if (perm.display !== 'granted') perm = await LN.requestPermissions();
     if (perm.display !== 'granted') return;
-    const ids = [];
-    DOCUMENTS_A_SUIVRE.forEach((d) => { ids.push({ id: d.id + 1 }, { id: d.id + 2 }); });
-    await LN.cancel({ notifications: ids });
     const aProgrammer = [];
-    DOCUMENTS_A_SUIVRE.forEach((d) => {
-      const fin = licence[d.cle];
-      if (!fin) return;
-      const le = d.nom === 'licence' ? 'Ta licence' : 'Ton certificat médical';
-      [[2, 'dans 2 mois'], [1, 'dans 1 mois']].forEach(([mois, quand]) => {
-        const jour = new Date(decalerMois(fin, -mois) + 'T10:00:00');
+    let id = 1;
+    liste.forEach((e) => {
+      e.mois.forEach((mois) => {
+        const jour = new Date(decalerMois(e.fin, -mois) + 'T10:00:00');
         if (jour > new Date()) {
           aProgrammer.push({
-            id: d.id + mois,
+            id: id++,
             title: 'Tir Coach',
-            body: `${le} expire ${quand} (le ${dateFr(fin)}).`,
+            body: `${e.texte} expire dans ${mois} mois (le ${dateFr(e.fin)}).`,
             schedule: { at: jour, allowWhileIdle: true }
           });
         }
@@ -410,11 +441,11 @@ async function programmerRappels() {
 // =====================================================================
 
 const ECRANS = ['Menu', 'Carnet', 'Form', 'Seance', 'TirForm', 'Ratelier', 'ArmeForm', 'Arme',
-  'Munitions', 'Stands', 'Stand', 'StandForm', 'Controles', 'Licence', 'Demarches', 'Apprendre', 'Infos'];
+  'Munitions', 'Stands', 'Stand', 'StandForm', 'Controles', 'Licence', 'Demarches', 'Apprendre', 'Infos', 'Papiers', 'PapierForm', 'Papier'];
 const TITRES = {
   menu: 'Tir Coach', carnet: 'Carnet de tir', seance: 'Séance', ratelier: 'Mon râtelier', arme: 'Arme',
   munitions: 'Munitions', stands: 'Stands & ouvertures', stand: 'Stand', controles: 'Tirs de contrôle',
-  licence: 'Licence & certificat', demarches: 'Démarches', apprendre: 'Apprendre', infos: 'À propos'
+  licence: 'Licence & certificat', demarches: 'Démarches', apprendre: 'Apprendre', infos: 'À propos', papiers: 'Mes papiers', papier: 'Papier'
 };
 
 function montrer(nom) {
@@ -426,7 +457,8 @@ function montrer(nom) {
     form: enModification ? 'Modifier la séance' : 'Nouvelle séance',
     tirform: tirEnModification ? "Modifier l'arme tirée" : 'Arme tirée',
     armeform: armeEnModification ? "Modifier l'arme" : 'Nouvelle arme',
-    standform: standEnModification ? 'Modifier le stand' : 'Nouveau stand'
+    standform: standEnModification ? 'Modifier le stand' : 'Nouveau stand',
+    papierform: papierEnModification ? 'Modifier le papier' : 'Nouveau papier'
   };
   $('titre').textContent = titres[nom] || TITRES[nom] || 'Tir Coach';
   if (nom === 'menu') afficherAlertes();
@@ -440,7 +472,11 @@ function retour() {
   switch (ecran) {
     case 'menu': case 'infos': montrer('accueil'); return true;
     case 'carnet': case 'ratelier': case 'munitions': case 'stands':
-    case 'controles': case 'licence': case 'demarches': case 'apprendre': montrer('menu'); return true;
+    case 'controles': case 'licence': case 'demarches': case 'apprendre': case 'papiers': montrer('menu'); return true;
+    case 'papier': afficherPapiers(); return true;
+    case 'papierform':
+      if (papierEnModification && papierActif) ouvrirPapier(papierActif.id); else afficherPapiers();
+      return true;
     case 'form':
       if (enModification && seanceActive) ouvrirSeance(seanceActive.id); else afficherCarnet();
       return true;
@@ -728,7 +764,7 @@ function afficherRatelier() {
     div.innerHTML = `
       <img class="miniature" alt="">
       <div class="milieu">
-        <div class="haut">${html(a.nom)}</div>
+        <div class="haut">${html(a.nom)}${a.pourRire ? '<span class="badge">pour rire</span>' : ''}</div>
         <div class="bas">${html(infos)}</div>
       </div>
       <div class="droite"><div class="nb">${pluriel(nb, 'séance')}</div></div>`;
@@ -748,6 +784,9 @@ function ouvrirFormulaireArme(modifier) {
   $('armeCalibre').value = a.calibre;
   $('armeChargeurs').value = a.chargeurs;
   $('armeNotes').value = a.notes;
+  $('armeRire').innerHTML = '<option value="">— choisir pour rire —</option>' +
+    ARMES_POUR_RIRE.map((n) => `<option>${html(n)}</option>`).join('');
+  $('zoneRire').classList.toggle('cache', a.categorie !== 'A');
   montrer('armeform');
 }
 
@@ -759,6 +798,7 @@ async function enregistrerArme() {
     chargeurs: $('armeChargeurs').value,
     notes: $('armeNotes').value.trim()
   };
+  valeurs.pourRire = ARMES_POUR_RIRE.includes(valeurs.nom);
   if (!valeurs.nom) { message("Indique le nom de l'arme."); return; }
   if (armeEnModification && armeActive) {
     const ancien = armeActive.nom;
@@ -865,6 +905,16 @@ async function supprimerArme() {
   await sauver();
   afficherRatelier();
 }
+
+$('armeCategorie').addEventListener('change', () => {
+  $('zoneRire').classList.toggle('cache', $('armeCategorie').value !== 'A');
+});
+$('armeRire').addEventListener('change', () => {
+  if (!$('armeRire').value) return;
+  $('armeNom').value = $('armeRire').value;
+  $('armeCalibre').value = 'Pour rire';
+  if (!$('armeNotes').value) $('armeNotes').value = 'Arme de catégorie A… pour rire 😄';
+});
 
 // =====================================================================
 // Munitions
@@ -1196,6 +1246,180 @@ function numeroEnGrand() {
 }
 
 // =====================================================================
+// Mes papiers
+// =====================================================================
+
+function nomCategoriePapier(id) { const c = CATEGORIES_PAPIERS.find((x) => x.id === id); return c ? c.nom : 'Autre'; }
+
+function afficherPapiers() {
+  const zone = $('listePapiers');
+  zone.innerHTML = '';
+  if (!papiers.length) zone.innerHTML = '<div class="vide">Aucun papier pour le moment.</div>';
+  CATEGORIES_PAPIERS.forEach((cat) => {
+    const liste = papiers.filter((p) => p.categorie === cat.id);
+    if (!liste.length) return;
+    const titre = document.createElement('h2');
+    titre.textContent = cat.nom;
+    zone.appendChild(titre);
+    liste.forEach((p) => {
+      const j = p.fin ? joursAvant(p.fin) : null;
+      const etat = p.fin ? (j < 0 ? ' — expiré' : '') : '';
+      const div = document.createElement('div');
+      div.className = 'carte ligneListe';
+      div.innerHTML = `
+        <img class="miniature" alt="">
+        <div class="milieu">
+          <div class="haut">${html(p.titre || cat.nom)}</div>
+          <div class="bas">${p.fin ? 'Jusqu\'au ' + dateFr(p.fin) + etat : 'Sans date de fin'} · ${pluriel(p.docs.length, 'document')}</div>
+        </div>`;
+      const img = div.querySelector('img');
+      if (p.docs.length) afficherImage(img, p.docs[0]); else img.style.visibility = 'hidden';
+      div.onclick = () => ouvrirPapier(p.id);
+      zone.appendChild(div);
+    });
+  });
+  montrer('papiers');
+}
+
+function texteRappel() {
+  const cat = CATEGORIES_PAPIERS.find((c) => c.id === $('papierCategorie').value);
+  $('aideRappel').textContent = cat && cat.id === 'autorisation'
+    ? 'Rappel chaque mois, à partir de 7 mois avant la fin.'
+    : 'Rappel 2 mois puis 1 mois avant la fin.';
+}
+
+function ouvrirFormulairePapier(modifier) {
+  papierEnModification = modifier;
+  const p = modifier && papierActif ? papierActif : { categorie: 'armes', titre: '', fin: '', notes: '' };
+  $('papierCategorie').innerHTML = CATEGORIES_PAPIERS.map((c) => `<option value="${c.id}">${html(c.nom)}</option>`).join('');
+  $('papierCategorie').value = p.categorie;
+  $('papierTitre').value = p.titre;
+  $('papierFin').value = p.fin;
+  $('papierNotes').value = p.notes;
+  texteRappel();
+  montrer('papierform');
+}
+
+async function enregistrerPapier() {
+  const valeurs = {
+    categorie: $('papierCategorie').value,
+    titre: $('papierTitre').value.trim(),
+    fin: $('papierFin').value,
+    notes: $('papierNotes').value.trim()
+  };
+  if (papierEnModification && papierActif) Object.assign(papierActif, valeurs);
+  else { papierActif = Object.assign({ id: Date.now(), docs: [] }, valeurs); papiers.push(papierActif); }
+  await sauver();
+  await programmerRappels();
+  ouvrirPapier(papierActif.id);
+}
+
+function ouvrirPapier(id) {
+  papierActif = papiers.find((p) => p.id === id);
+  if (!papierActif) return afficherPapiers();
+  papierEnModification = false;
+  const p = papierActif;
+  $('resumePapier').innerHTML = `
+    <div class="haut">${html(p.titre || nomCategoriePapier(p.categorie))}</div>
+    <div class="bas">${html(nomCategoriePapier(p.categorie))}</div>
+    ${p.fin ? `<div class="bas">Valable jusqu'au ${dateFr(p.fin)}</div>` : ''}
+    ${p.notes ? `<div class="notes">${html(p.notes)}</div>` : ''}`;
+  const grille = $('grillePapier');
+  grille.innerHTML = '';
+  p.docs.forEach((nom) => {
+    grille.appendChild(vignette(nom, async () => {
+      p.docs = p.docs.filter((d) => d !== nom);
+      await sauver();
+      ouvrirPapier(p.id);
+    }));
+  });
+  montrer('papier');
+}
+
+async function documentPapier(source) {
+  if (sansNatif()) return;
+  const p = papierActif;
+  try {
+    const nom = `Papiers/${nettoyer(p.titre || p.categorie) || 'Papier'}_${Date.now()}.jpg`;
+    if (!(await obtenirImage(source, nom))) return;
+    p.docs.push(nom);
+    await sauver();
+    ouvrirPapier(p.id);
+    message('Document ajouté');
+  } catch (e) { erreurPhoto(e); }
+}
+
+async function supprimerPapier() {
+  if (!papierActif) return;
+  if (!confirm('Supprimer ce papier ?\nLes images restent dans Documents/TirCoach/Papiers.')) return;
+  papiers = papiers.filter((p) => p.id !== papierActif.id);
+  papierActif = null;
+  await sauver();
+  await programmerRappels();
+  afficherPapiers();
+}
+
+// =====================================================================
+// Partage, sauvegarde, premier lancement
+// =====================================================================
+
+async function partagerAppli() {
+  const texte = "Tir Coach : le carnet de tir gratuit et 100 % local (séances, cibles, râtelier, munitions, licence…). À télécharger ici :";
+  try {
+    if (natif && P.Share) { await P.Share.share({ title: 'Tir Coach', text: texte, url: PLAY_STORE, dialogTitle: "Partager Tir Coach" }); return; }
+    if (navigator.share) { await navigator.share({ title: 'Tir Coach', text: texte, url: PLAY_STORE }); return; }
+  } catch (e) { return; }
+  message(PLAY_STORE);
+}
+
+async function exporterSauvegarde() {
+  await sauver();
+  if (!natif) { message('Ça marche seulement dans l\'appli Android.'); return; }
+  try {
+    const nom = `TirCoach-sauvegarde-${aujourdhui()}.json`;
+    const r = await P.Filesystem.writeFile({ path: nom, data: JSON.stringify(donneesCompletes(), null, 2), directory: 'CACHE', encoding: 'utf8' });
+    await P.Share.share({ title: 'Sauvegarde Tir Coach', text: 'Ma sauvegarde Tir Coach', files: [r.uri], dialogTitle: 'Envoyer la sauvegarde' });
+  } catch (e) {
+    if (!/cancel/i.test(String(e && e.message))) message('Export impossible : ' + ((e && e.message) || e));
+  }
+}
+
+function restaurerSauvegarde(fichier) {
+  const lecteur = new FileReader();
+  lecteur.onload = async () => {
+    try {
+      const d = JSON.parse(lecteur.result);
+      if (!d || !Array.isArray(d.seances)) throw new Error('fichier non reconnu');
+      if (!confirm(`Remplacer toutes les données de l'appli par cette sauvegarde ?\n(${pluriel(d.seances.length, 'séance')}, ${pluriel((d.armes || []).length, 'arme')})`)) return;
+      seances = migrerSeances(d.seances);
+      armes = d.armes || [];
+      munitions = d.munitions || [];
+      standsPerso = d.standsPerso || [];
+      controles = (d.controles || []).filter((c) => !String(c.id).startsWith('base-'));
+      licence = Object.assign({ numero: '', fin: '', image: '', certificatFin: '', certificatImage: '' }, d.licence || {});
+      papiers = d.papiers || [];
+      await sauver();
+      await programmerRappels();
+      message('Sauvegarde restaurée');
+      montrer('menu');
+    } catch (e) { message('Restauration impossible : ' + e.message); }
+  };
+  lecteur.readAsText(fichier);
+}
+
+function verifierAccord() {
+  const ok = () => { $('btnAccord').disabled = !($('accord1').checked && $('accord2').checked); };
+  $('accord1').onchange = ok;
+  $('accord2').onchange = ok;
+  $('btnAccord').onclick = () => {
+    try { localStorage.setItem(CLES.accord, JSON.stringify({ date: new Date().toISOString() })); } catch (e) {}
+    $('ecranBienvenue').classList.add('cache');
+    programmerRappels();
+  };
+  if (!charger(CLES.accord, null)) $('ecranBienvenue').classList.remove('cache');
+}
+
+// =====================================================================
 // Apprendre
 // =====================================================================
 
@@ -1235,6 +1459,7 @@ document.querySelectorAll('.tuile').forEach((t) => {
       case 'licence': afficherLicence(); break;
       case 'demarches': montrer('demarches'); break;
       case 'apprendre': afficherApprendre(); break;
+      case 'papiers': afficherPapiers(); break;
       default: message('Cette partie arrive bientôt.');
     }
   };
@@ -1282,6 +1507,18 @@ if (natif && P.App) {
 }
 
 $('btnInfos').onclick = () => montrer('infos');
+$('btnPartager').onclick = partagerAppli;
+$('btnExporter').onclick = exporterSauvegarde;
+$('btnRestaurer').onclick = () => $('fichierRestauration').click();
+$('fichierRestauration').onchange = (e) => { if (e.target.files[0]) restaurerSauvegarde(e.target.files[0]); e.target.value = ''; };
+
+$('btnNouveauPapier').onclick = () => ouvrirFormulairePapier(false);
+$('btnEnregistrerPapier').onclick = enregistrerPapier;
+$('btnModifierPapier').onclick = () => ouvrirFormulairePapier(true);
+$('btnPhotoPapier').onclick = () => documentPapier('photo');
+$('btnGaleriePapier').onclick = () => documentPapier('galerie');
+$('btnSupprimerPapier').onclick = supprimerPapier;
+$('papierCategorie').onchange = texteRappel;
 
 async function afficherVersion() {
   let v = '';
@@ -1290,5 +1527,6 @@ async function afficherVersion() {
 }
 
 afficherVersion();
-programmerRappels();
+verifierAccord();
+if (charger(CLES.accord, null)) programmerRappels();
 montrer('accueil');
