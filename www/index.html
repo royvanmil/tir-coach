@@ -13,7 +13,7 @@
     <img src="logo.svg" alt="" class="logoBienvenue">
     <h1 class="titreAccueil">TIR COACH</h1>
     <div class="grosMots"><span>GRATUIT</span><span>100 % LOCAL</span></div>
-    <p class="texteBienvenue">Tes données et tes photos restent sur ton téléphone. Rien n'est envoyé sur internet.</p>
+    <p class="texteBienvenue">Tes données et tes photos restent sur ton téléphone. Aucune de tes données n'est envoyée sur internet.</p>
     <label class="caseACocher accord"><input type="checkbox" id="accord1"><span>Mes données et mes photos sont sur mon téléphone. J'en suis responsable, comme de mon téléphone.</span></label>
     <label class="caseACocher accord"><input type="checkbox" id="accord2"><span>L'appli ne sert que d'outil. Aucune donnée n'est collectée, ni utilisée.</span></label>
     <button id="btnAccord" class="gros" disabled>Entrer</button>
@@ -359,7 +359,8 @@
     </div>
     <div class="carte demarche">
       <div class="haut">&#128274; Confidentialité</div>
-      <p>Tir Coach n'envoie aucune donnée. Pas de compte, pas de publicité, pas de suivi.</p>
+      <p>Tir Coach n'envoie aucune de tes données. Pas de compte, pas de publicité, pas de suivi.</p>
+      <p>Quand tu es connecté, l'appli peut seulement recevoir un petit message de Roy (une nouvelle version, une demande de testeurs…). Elle reçoit, elle n'envoie rien.</p>
       <p>Tout reste sur ton téléphone : les photos et la sauvegarde sont dans le dossier <b>Documents/TirCoach</b>.</p>
       <p>L'appareil photo et la galerie servent uniquement aux photos que tu choisis d'ajouter. Les notifications servent uniquement aux rappels de fin de validité.</p>
       <p>Tes données et tes photos sont sur ton téléphone : tu en es responsable, comme de ton téléphone. L'appli ne sert que d'outil.</p>
@@ -414,6 +415,15 @@
   </main>
 
   <!-- Photo en grand -->
+  <div id="messageRoy" class="cache">
+    <div class="boiteMessage">
+      <h2 id="msgTitre"></h2>
+      <p id="msgTexte"></p>
+      <a id="msgBouton" class="gros lien cache" href="#" target="_blank" rel="noopener"></a>
+      <button id="msgPlusTard" class="gros">Plus tard</button>
+      <button id="msgJamais" class="discret">Ne plus afficher</button>
+    </div>
+  </div>
   <div id="visionneuse" class="cache">
     <img id="imageGrande" alt="">
     <p id="nomGrand"></p>

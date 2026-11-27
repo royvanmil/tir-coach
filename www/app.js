@@ -1439,6 +1439,35 @@ function restaurerSauvegarde(fichier) {
   lecteur.readAsText(fichier);
 }
 
+// Message de Roy à l'ouverture (lu sur son serveur ; l'appli n'envoie aucune donnée)
+const SERVEUR_MESSAGE = 'https://avis-tircoach.royvanmil86.workers.dev/message';
+async function messageDeRoy() {
+  let ouv = 0;
+  try { ouv = (parseInt(localStorage.getItem('tircoach-ouvertures'), 10) || 0) + 1; localStorage.setItem('tircoach-ouvertures', String(ouv)); } catch (e) {}
+  if (ouv < 2 || !charger(CLES.accord, null) || !navigator.onLine) return;
+  const vus = charger('tircoach-messages', {});
+  let m;
+  try {
+    const ctrl = new AbortController();
+    const minuteur = setTimeout(() => ctrl.abort(), 5000);
+    const r = await fetch(SERVEUR_MESSAGE, { cache: 'no-store', signal: ctrl.signal });
+    clearTimeout(minuteur);
+    m = await r.json();
+  } catch (e) { return; }
+  if (!m || !m.id || !m.titre) return;
+  const etat = vus[m.id];
+  if (etat === 'jamais' || (etat && aujourdhui() < etat)) return;
+  const noter = (v) => { vus[m.id] = v; try { localStorage.setItem('tircoach-messages', JSON.stringify(vus)); } catch (e) {} $('messageRoy').classList.add('cache'); };
+  $('msgTitre').textContent = m.titre;
+  $('msgTexte').textContent = m.texte || '';
+  const b = $('msgBouton');
+  if (m.bouton && m.lien) { b.textContent = m.bouton; b.href = m.lien; b.classList.remove('cache'); b.onclick = () => noter('jamais'); }
+  else b.classList.add('cache');
+  $('msgPlusTard').onclick = () => { const d = new Date(); d.setDate(d.getDate() + 7); noter(d.toISOString().slice(0, 10)); };
+  $('msgJamais').onclick = () => noter('jamais');
+  $('messageRoy').classList.remove('cache');
+}
+
 function verifierAccord() {
   const ok = () => { $('btnAccord').disabled = !($('accord1').checked && $('accord2').checked); };
   $('accord1').onchange = ok;
@@ -1449,6 +1478,7 @@ function verifierAccord() {
     programmerRappels();
   };
   if (!charger(CLES.accord, null)) $('ecranBienvenue').classList.remove('cache');
+  messageDeRoy();
 }
 
 // =====================================================================
