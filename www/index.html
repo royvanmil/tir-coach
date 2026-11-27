@@ -7,30 +7,64 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <button id="btnRetour" class="icone cache" aria-label="Retour">&#8592;</button>
+
+  <!-- Écran d'accueil -->
+  <section id="ecranAccueil">
+    <img src="logo.svg" alt="" class="logoAccueil">
+    <h1 class="titreAccueil">TIR COACH</h1>
+    <p class="sousTitre">Ton carnet de tir</p>
+    <button id="btnEntrer" class="gros">Entrer dans le stand</button>
+  </section>
+
+  <header id="entete" class="cache">
+    <button id="btnRetour" class="icone" aria-label="Retour">&#8592;</button>
     <h1 id="titre">Tir Coach</h1>
   </header>
 
-  <!-- Écran 1 : liste des séances -->
-  <main id="ecranListe">
-    <button id="btnNouvelle" class="gros">+ Nouvelle séance</button>
-    <div id="listeSeances"></div>
-    <p class="info">Les photos sont enregistrées dans le dossier<br><b>Documents/TirCoach</b> du téléphone.</p>
+  <!-- Menu -->
+  <main id="ecranMenu" class="cache">
+    <div class="tuiles">
+      <button class="tuile" data-va="carnet"><span>&#128214;</span>Carnet de tir</button>
+      <button class="tuile bientot"><span>&#128197;</span>Ouvertures du stand<small>Bientôt</small></button>
+      <button class="tuile bientot"><span>&#9989;</span>Tirs de contrôle<small>Bientôt</small></button>
+      <button class="tuile bientot"><span>&#128452;&#65039;</span>Mon râtelier<small>Bientôt</small></button>
+      <button class="tuile bientot"><span>&#128193;</span>Mes papiers<small>Bientôt</small></button>
+      <button class="tuile bientot"><span>&#129706;</span>Ma licence<small>Bientôt</small></button>
+    </div>
+    <p class="info">Tout reste sur ton téléphone.<br>Photos et sauvegarde : <b>Documents/TirCoach</b></p>
   </main>
 
-  <!-- Écran 2 : nouvelle séance -->
-  <main id="ecranNouvelle" class="cache">
+  <!-- Carnet : liste des séances -->
+  <main id="ecranCarnet" class="cache">
+    <button id="btnNouvelle" class="gros">+ Nouvelle séance</button>
+    <div id="listeSeances"></div>
+  </main>
+
+  <!-- Formulaire séance (nouvelle ou modifier) -->
+  <main id="ecranForm" class="cache">
     <label>Date
       <input type="date" id="champDate">
+    </label>
+    <label>Lieu
+      <input type="text" id="champLieu" list="listeLieux" placeholder="ex. TAA Eauze">
+      <datalist id="listeLieux"></datalist>
     </label>
     <label>Arme
       <input type="text" id="champArme" list="listeArmes" placeholder="ex. Glock 17">
       <datalist id="listeArmes"></datalist>
     </label>
-    <label>Distance (m)
-      <input type="number" id="champDistance" inputmode="numeric" value="25">
+    <label>Munitions (marque, type)
+      <input type="text" id="champMunition" list="listeMunitions" placeholder="ex. Geco 9 mm FMJ 124 gr">
+      <datalist id="listeMunitions"></datalist>
     </label>
+    <div class="ligne2">
+      <label>Nombre de coups
+        <input type="number" id="champCoups" inputmode="numeric" placeholder="ex. 50">
+      </label>
+      <label>Distance (m)
+        <input type="number" id="champDistance" inputmode="numeric" value="25">
+      </label>
+    </div>
     <label>Cible
       <select id="champCible">
         <option>C50</option>
@@ -39,15 +73,19 @@
         <option>Autre</option>
       </select>
     </label>
-    <button id="btnCreer" class="gros">Créer la séance</button>
+    <label>Notes
+      <textarea id="champNotes" rows="3" placeholder="Ressenti, réglages, météo…"></textarea>
+    </label>
+    <button id="btnEnregistrer" class="gros">Enregistrer</button>
   </main>
 
-  <!-- Écran 3 : détail d'une séance -->
+  <!-- Détail d'une séance -->
   <main id="ecranSeance" class="cache">
     <div id="resumeSeance" class="carte"></div>
-    <button id="btnPhoto" class="gros">&#128247; Prendre une photo</button>
+    <button id="btnModifier" class="discret">Modifier les infos</button>
+    <button id="btnPhoto" class="gros">&#128247; Prendre une photo de cible</button>
     <div id="grillePhotos"></div>
-    <button id="btnSupprimer" class="discret">Supprimer la séance de la liste</button>
+    <button id="btnSupprimer" class="discret">Supprimer la séance du carnet</button>
   </main>
 
   <!-- Photo en grand -->

@@ -18,6 +18,29 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.cache { display: none !important; }
+
+button { font: inherit; cursor: pointer; }
+
+/* ---------- Accueil ---------- */
+
+#ecranAccueil {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 30px;
+  text-align: center;
+}
+.logoAccueil { width: 58vw; max-width: 260px; margin-bottom: 20px; }
+.titreAccueil { margin: 0; font-size: 34px; letter-spacing: 6px; color: var(--or); }
+.sousTitre { margin: 0 0 40px; color: var(--gris); }
+#ecranAccueil .gros { width: 100%; max-width: 360px; }
+
+/* ---------- En-tête ---------- */
+
 header {
   display: flex;
   align-items: center;
@@ -29,14 +52,11 @@ header {
   top: 0;
   z-index: 5;
 }
-
-h1 { margin: 0; font-size: 22px; color: var(--or); letter-spacing: 1px; }
+h1#titre { margin: 0; font-size: 22px; color: var(--or); letter-spacing: 1px; }
 
 main { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
-.cache { display: none !important; }
-
-button { font: inherit; cursor: pointer; }
+/* ---------- Boutons ---------- */
 
 .gros {
   background: var(--or);
@@ -47,7 +67,6 @@ button { font: inherit; cursor: pointer; }
   font-weight: 700;
   font-size: 18px;
 }
-
 .icone {
   background: none;
   border: none;
@@ -55,26 +74,57 @@ button { font: inherit; cursor: pointer; }
   font-size: 26px;
   padding: 0 8px 0 0;
 }
-
 .discret {
   background: none;
   border: 1px solid var(--bord);
   color: var(--gris);
   border-radius: 10px;
   padding: 10px;
-  margin-top: 20px;
 }
 
-label { display: flex; flex-direction: column; gap: 6px; color: var(--gris); font-size: 15px; }
+/* ---------- Menu ---------- */
 
-input, select {
+.tuiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.tuile {
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: 16px;
+  color: var(--texte);
+  padding: 18px 10px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+}
+.tuile span { font-size: 34px; }
+.tuile small { color: var(--gris); font-weight: 400; font-size: 12px; }
+.tuile:not(.bientot) { border-color: var(--or); }
+.tuile.bientot { opacity: 0.5; }
+
+/* ---------- Formulaires ---------- */
+
+label { display: flex; flex-direction: column; gap: 6px; color: var(--gris); font-size: 15px; flex: 1; }
+
+input, select, textarea {
   font: inherit;
   color: var(--texte);
   background: var(--carte);
   border: 1px solid var(--bord);
   border-radius: 10px;
   padding: 12px;
+  width: 100%;
 }
+.ligne2 { display: flex; gap: 12px; }
+
+/* ---------- Cartes ---------- */
 
 .carte {
   background: var(--carte);
@@ -82,24 +132,27 @@ input, select {
   border-radius: 14px;
   padding: 14px;
 }
+.carte .haut { font-weight: 700; }
+.carte .bas { color: var(--gris); font-size: 15px; margin-top: 4px; }
+.carte .notes { color: var(--texte); font-size: 15px; margin-top: 8px; white-space: pre-wrap; }
 
-.seance { display: flex; justify-content: space-between; align-items: center; }
-.seance .haut { font-weight: 700; }
-.seance .bas { color: var(--gris); font-size: 15px; margin-top: 4px; }
-.seance .nb { color: var(--or); font-weight: 700; font-size: 20px; }
+.seance { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.seance .droite { text-align: right; white-space: nowrap; }
+.seance .score { color: var(--or); font-weight: 700; font-size: 20px; }
+.seance .nb { color: var(--gris); font-size: 14px; }
 
 #listeSeances { display: flex; flex-direction: column; gap: 10px; }
-
 .vide { color: var(--gris); text-align: center; padding: 30px 0; }
-
 .info { color: var(--gris); font-size: 13px; text-align: center; }
+.total { color: var(--or); font-weight: 700; margin-top: 8px; }
+
+/* ---------- Photos ---------- */
 
 #grillePhotos {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-
 .vignette {
   background: var(--carte);
   border: 1px solid var(--bord);
@@ -107,7 +160,10 @@ input, select {
   overflow: hidden;
 }
 .vignette img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #000; }
-.vignette p { margin: 0; padding: 6px; font-size: 11px; color: var(--gris); word-break: break-all; }
+.vignette .nom { margin: 0; padding: 6px 6px 0; font-size: 11px; color: var(--gris); word-break: break-all; }
+.vignette .zoneScore { display: flex; align-items: center; gap: 6px; padding: 6px; }
+.vignette .zoneScore span { color: var(--gris); font-size: 14px; }
+.vignette .zoneScore input { padding: 8px; font-size: 16px; }
 
 #visionneuse {
   position: fixed;
