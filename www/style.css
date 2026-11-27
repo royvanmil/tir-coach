@@ -311,3 +311,51 @@ input, select, textarea {
 #grandNumero .aide { color: #666; }
 
 .controle .supprStock { background: none; border: none; color: var(--gris); font-size: 13px; margin-top: 6px; padding: 0; }
+
+/* ---------- V5 ---------- */
+
+.tuile.large { grid-column: 1 / -1; min-height: 80px; }
+.regle { margin: 10px 0 0; color: var(--gris); font-size: 12px; line-height: 1.4; }
+.caseACocher { flex-direction: row; align-items: center; gap: 10px; color: var(--texte); font-size: 16px; }
+.caseACocher input { width: 24px; height: 24px; accent-color: var(--or); }
+.deuxBoutons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.alerte { border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; font-weight: 600; }
+.alerte.rouge { background: #4a1414; border: 1px solid var(--rouge); color: #ffd6d6; }
+.alerte.orange { background: #4a3410; border: 1px solid var(--or); color: #ffe7b8; }
+
+.vignette .cadre { position: relative; }
+.supprPhoto {
+  position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(0,0,0,0.65); color: #fff; border: none; font-size: 15px; line-height: 30px; padding: 0;
+}
+
+.calibreImg { display: block; width: 100%; height: 72px; object-fit: cover; object-position: left center; background: #f4f1e8; border-radius: 10px; margin-top: 10px; }
+.photoStock { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-top: 10px; }
+.liensStock { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.lienPetit { background: none; border: none; color: var(--gris); font-size: 13px; padding: 4px 6px; }
+
+.controle.passe { opacity: 0.45; }
+.controle.prochaine { border-color: var(--or); }
+
+.theme summary { font-weight: 700; font-size: 17px; cursor: pointer; list-style: none; }
+.theme summary::-webkit-details-marker { display: none; }
+.theme summary::after { content: ' ›'; color: var(--or); }
+.theme[open] summary::after { content: ' ⌄'; }
+.theme dl { margin: 10px 0 0; }
+.theme dt { color: var(--or); font-weight: 700; margin-top: 12px; }
+.theme dd { margin: 4px 0 0; line-height: 1.45; }
+.theme dd a { color: var(--or); }
+.theme .dessin img, .dessinHaut {
+  display: block; max-width: 100%; max-height: 120px; margin: 6px 0;
+  background: #f4f1e8; border-radius: 10px; padding: 6px;
+}
+.dessinHaut { margin-top: 12px; max-height: 160px; }
+
+/* ---------- À propos ---------- */
+.btnInfos {
+  position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px;
+  width: 40px; height: 40px; border-radius: 50%; background: none;
+  border: 1px solid var(--bord); color: var(--gris); font-size: 20px;
+}
+.logoInfos { width: 90px; margin: 6px auto 10px; display: block; }

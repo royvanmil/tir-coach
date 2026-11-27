@@ -14,7 +14,8 @@
     <h1 class="titreAccueil">TIR COACH</h1>
     <p class="sousTitre">Ton carnet de tir</p>
     <button id="btnEntrer" class="gros">Entrer dans le stand</button>
-    <p class="signature">Roy VAN MIL</p>
+    <button id="btnInfos" class="btnInfos" aria-label="Infos">&#9432;</button>
+    <p class="signature">Roy VAN MIL · <span class="version"></span></p>
   </section>
 
   <header id="entete" class="cache">
@@ -24,21 +25,24 @@
 
   <!-- Menu -->
   <main id="ecranMenu" class="cache">
+    <div id="alertes"></div>
     <div class="tuiles">
       <button class="tuile" data-va="carnet"><span>&#128214;</span>Carnet de tir</button>
       <button class="tuile" data-va="ratelier"><span>&#128452;&#65039;</span>Mon râtelier</button>
       <button class="tuile" data-va="munitions"><span>&#128230;</span>Munitions</button>
       <button class="tuile" data-va="stands"><span>&#128197;</span>Stands &amp; ouvertures</button>
       <button class="tuile" data-va="controles"><span>&#9989;</span>Tirs de contrôle</button>
-      <button class="tuile" data-va="licence"><span>&#129706;</span>Ma licence</button>
+      <button class="tuile" data-va="licence"><span>&#129706;</span>Licence &amp; certificat</button>
       <button class="tuile" data-va="demarches"><span>&#127963;&#65039;</span>Démarches</button>
-      <button class="tuile bientot"><span>&#128193;</span>Mes papiers<small>Bientôt</small></button>
+      <button class="tuile" data-va="apprendre"><span>&#127891;</span>Apprendre</button>
+      <button class="tuile bientot large"><span>&#128193;</span>Mes papiers<small>Bientôt</small></button>
     </div>
     <p class="info">Tout reste sur ton téléphone.<br>Photos et sauvegarde : <b>Documents/TirCoach</b></p>
   </main>
 
   <!-- ===== CARNET ===== -->
   <main id="ecranCarnet" class="cache">
+    <div id="compteurControles" class="carte"></div>
     <button id="btnNouvelle" class="gros">+ Nouvelle séance</button>
     <div id="listeSeances" class="liste"></div>
   </main>
@@ -55,6 +59,10 @@
       <div class="etiquette">Note de la séance (1 à 10)</div>
       <div id="choixNote" class="notes10"></div>
     </div>
+    <label class="caseACocher">
+      <input type="checkbox" id="champControle">
+      <span>Tir contrôlé (noté au registre du club)</span>
+    </label>
     <label>Notes
       <textarea id="champNotes" rows="3" placeholder="Ressenti, météo, réglages…"></textarea>
     </label>
@@ -134,7 +142,10 @@
   <main id="ecranArme" class="cache">
     <div id="resumeArme" class="carte"></div>
     <button id="btnModifierArme" class="discret">Modifier les infos</button>
-    <button id="btnPhotoArme" class="gros">&#128247; Ajouter une photo</button>
+    <div class="deuxBoutons">
+      <button id="btnPhotoArme" class="gros">&#128247; Photo</button>
+      <button id="btnGalerieArme" class="gros">&#128444;&#65039; Galerie</button>
+    </div>
     <div id="grillePhotosArme" class="grille"></div>
 
     <h2>Modifications</h2>
@@ -164,7 +175,8 @@
     <div id="listeStock" class="liste"></div>
     <div class="carte formStock">
       <div class="haut">Ajouter une munition</div>
-      <input type="text" id="stockNom" placeholder="ex. Geco 9 mm FMJ 124 gr">
+      <select id="stockCalibre"></select>
+      <input type="text" id="stockNom" placeholder="Marque, type — ex. Geco FMJ 124 gr">
       <input type="number" id="stockQte" inputmode="numeric" placeholder="Quantité">
       <button id="btnAjoutStock" class="gros">Ajouter</button>
     </div>
@@ -179,6 +191,7 @@
 
   <main id="ecranStand" class="cache">
     <div id="ficheStand" class="carte"></div>
+    <a id="lienSiteStand" class="gros lien" href="#" target="_blank" rel="noopener">&#127760; Site du club</a>
     <button id="btnModifierStand" class="discret">Modifier ce stand</button>
     <button id="btnProposerStand" class="discret">&#9993;&#65039; Proposer ce stand pour la prochaine mise à jour</button>
     <button id="btnSupprimerStand" class="discret">Supprimer ce stand</button>
@@ -197,8 +210,8 @@
     <label>Distances / pas de tir
       <input type="text" id="standDistances" placeholder="ex. 10 m, 25 m, 50 m">
     </label>
-    <label>Contact
-      <textarea id="standContact" rows="2"></textarea>
+    <label>Site web
+      <input type="url" id="standSite" placeholder="https://…">
     </label>
     <label>Notes
       <textarea id="standNotes" rows="2"></textarea>
@@ -208,7 +221,7 @@
 
   <!-- ===== TIRS DE CONTRÔLE ===== -->
   <main id="ecranControles" class="cache">
-    <div id="compteurControles" class="carte"></div>
+    <p class="aide">Les dates des tirs de contrôle organisés par ton stand, pour info. Le stand choisi reste affiché la prochaine fois.</p>
     <label>Stand
       <select id="controleStand"></select>
     </label>
@@ -229,14 +242,54 @@
     <label>Numéro de licence
       <input type="text" id="licenceNumero" inputmode="numeric" placeholder="ex. 1234567">
     </label>
-    <label>Valable jusqu'au
+    <label>Licence valable jusqu'au
       <input type="date" id="licenceFin">
     </label>
+    <label>Certificat médical valable jusqu'au
+      <input type="date" id="certificatFin">
+    </label>
+    <p class="aide">Tu recevras une notification 2 mois puis 1 mois avant chaque date.</p>
     <button id="btnEnregistrerLicence" class="gros">Enregistrer</button>
     <h2>Image de la licence</h2>
     <p class="aide">Télécharge ta licence sur EDEN (eden.fftir.org), fais une capture ou garde l'image dans ta galerie, puis choisis-la ici.</p>
     <img id="imageLicence" class="imageLicence cache" alt="Licence">
     <button id="btnChoisirLicence" class="gros">&#128444;&#65039; Choisir l'image de ma licence</button>
+    <h2>Certificat médical</h2>
+    <img id="imageCertificat" class="imageLicence cache" alt="Certificat médical">
+    <button id="btnChoisirCertificat" class="gros">&#128444;&#65039; Choisir l'image du certificat</button>
+  </main>
+
+  <!-- ===== APPRENDRE ===== -->
+  <main id="ecranApprendre" class="cache">
+    <p class="aide">Les bases du tir sportif, en bref. Appuie sur un thème pour l'ouvrir.</p>
+    <div id="listeApprendre" class="liste"></div>
+  </main>
+
+  <!-- ===== À PROPOS ===== -->
+  <main id="ecranInfos" class="cache">
+    <div class="carte centre">
+      <img src="logo.svg" alt="" class="logoInfos">
+      <div class="haut">Tir Coach</div>
+      <div class="bas"><span class="version"></span></div>
+      <div class="bas">Créé par Roy VAN MIL</div>
+    </div>
+    <div class="carte demarche">
+      <div class="haut">&#128274; Confidentialité</div>
+      <p>Tir Coach n'envoie aucune donnée. Pas de compte, pas de publicité, pas de suivi.</p>
+      <p>Tout reste sur ton téléphone : les photos et la sauvegarde sont dans le dossier <b>Documents/TirCoach</b>.</p>
+      <p>L'appareil photo et la galerie servent uniquement aux photos que tu choisis d'ajouter. Les notifications servent uniquement aux rappels de licence et de certificat.</p>
+    </div>
+    <div class="carte demarche">
+      <div class="haut">&#128220; Conditions d'utilisation</div>
+      <p>Tir Coach est une appli gratuite, faite par un tireur pour les tireurs, et fournie telle quelle.</p>
+      <p>Les règles et informations affichées (tirs contrôlés, catégories, munitions…) sont un aide-mémoire. Les textes officiels et les portails EDEN, SIA et Service-public.fr font référence.</p>
+      <p>Les horaires et les dates des stands peuvent changer : vérifie auprès de ton club.</p>
+    </div>
+    <div class="carte demarche">
+      <div class="haut">&#128588; Merci</div>
+      <p>Le contenu « Apprendre » et les dessins des calibres viennent du site du T.A.A. Eauze.</p>
+    </div>
+    <a class="gros lien" href="mailto:royvanmilperso@gmail.com?subject=Tir%20Coach">&#9993;&#65039; Écrire au créateur</a>
   </main>
 
   <!-- ===== DÉMARCHES ===== -->
