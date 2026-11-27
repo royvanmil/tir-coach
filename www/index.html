@@ -46,9 +46,13 @@
       <button class="tuile" data-va="licence"><span>&#129706;</span>Licence &amp; certificat</button>
       <button class="tuile" data-va="demarches"><span>&#127963;&#65039;</span>Démarches</button>
       <button class="tuile" data-va="apprendre"><span>&#127891;</span>Apprendre</button>
-      <button class="tuile large" data-va="papiers"><span>&#128193;</span>Mes papiers</button>
+      <button class="tuile" data-va="papiers"><span>&#128193;</span>Mes papiers</button>
+      <button class="tuile" data-va="jeu"><span>&#127919;</span>Jeu de précision</button>
+      <button class="tuile large" data-va="infos"><span>&#8505;&#65039;</span>Infos &amp; avis</button>
     </div>
     <p class="info">Tout reste sur ton téléphone.<br>Photos et sauvegarde : <b>Documents/TirCoach</b></p>
+    <img src="images/roi-des-tirs.jpg" alt="" class="imageDrole">
+    <img src="images/bd-decouvrir.jpg" alt="" class="imageDrole">
   </main>
 
   <!-- ===== CARNET ===== -->
@@ -131,7 +135,7 @@
       <label>Catégorie
         <select id="armeCategorie">
           <option value="">—</option>
-          <option value="A">A (pour rire &#128514;)</option>
+          <option value="A">A</option>
           <option>A1</option>
           <option>B</option>
           <option>C</option>
@@ -142,7 +146,7 @@
         <input type="text" id="armeCalibre" placeholder="ex. 9 mm">
       </label>
     </div>
-    <label id="zoneRire" class="cache">&#128514; Arme pour rire (catégorie A)
+    <label id="zoneRire" class="cache">Armes de catégorie A
       <select id="armeRire"></select>
     </label>
     <label>Nombre de chargeurs
@@ -316,8 +320,30 @@
     <button id="btnSupprimerPapier" class="discret">Supprimer ce papier</button>
   </main>
 
+  <!-- ===== JEU ===== -->
+  <main id="ecranJeu" class="cache">
+    <p class="aide centre">5 coups, comme au stand. Le viseur bouge un peu, comme une vraie main : tire au bon moment !</p>
+    <div class="jeuHaut"><span>Coup <b id="jCoup">1</b> / 5</span><span>Score : <b id="jScore">0</b> / 50</span></div>
+    <canvas id="jCible" width="500" height="500"></canvas>
+    <button id="jTir" class="gros rougeVif">&#128165; TIRER</button>
+    <div id="jFin" class="carte centre cache">
+      <div class="compteur" id="jTotal">0 / 50</div>
+      <p id="jMot"></p>
+      <input type="text" id="jNom" maxlength="30" placeholder="Ton prénom ou pseudo">
+      <button id="jEnregistrer" class="gros" style="margin-top:10px;width:100%">Enregistrer mon score</button>
+      <button id="jRejouer" class="discret" style="margin-top:10px;width:100%">&#128260; Rejouer</button>
+    </div>
+    <div class="carte">
+      <div class="haut">&#127942; Meilleurs scores</div>
+      <ol id="jClassement" class="classement"></ol>
+    </div>
+    <img src="images/roi-des-tirs.jpg" alt="" class="imageDrole">
+    <p class="aide centre">Le jeu ne remplace pas le vrai tir… va t'entraîner au stand !</p>
+  </main>
+
   <!-- ===== À PROPOS ===== -->
   <main id="ecranInfos" class="cache">
+    <a class="gros lien" href="https://play.google.com/store/apps/details?id=fr.royvanmil.tircoach" target="_blank" rel="noopener">&#11088; Laisser un avis</a>
     <div class="carte centre">
       <img src="logo.svg" alt="" class="logoInfos">
       <div class="haut">Tir Coach</div>
@@ -327,7 +353,6 @@
     <div class="carte demarche centre">
       <div class="haut">&#11088; Cette appli est gratuite !</div>
       <p>Roy VAN MIL sera content de connaître ton avis. Laisse une petite note sur le Play Store, et partage l'appli avec tes amis du tir.</p>
-      <a id="lienNote" class="gros lien" href="https://play.google.com/store/apps/details?id=fr.royvanmil.tircoach" target="_blank" rel="noopener">&#11088; Laisser une note</a>
       <button id="btnPartager" class="gros" style="margin-top:10px;width:100%">&#128228; Partager l'appli</button>
       <p class="aide" style="margin-top:14px">Ou fais scanner ce QR code :</p>
       <img src="images/qr-playstore.svg" alt="QR code Tir Coach" class="qr">

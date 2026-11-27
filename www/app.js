@@ -14,7 +14,9 @@ const CLES = {
   licence: 'tircoach-licence',
   standFavori: 'tircoach-stand-favori',
   papiers: 'tircoach-papiers',
-  accord: 'tircoach-accord'
+  accord: 'tircoach-accord',
+  avis: 'tircoach-avis',
+  scores: 'tircoach-scores'
 };
 
 // =====================================================================
@@ -176,6 +178,7 @@ let armeEnModification = false;
 let standEnModification = false;
 let noteChoisie = 0;
 let ecran = 'accueil';
+let depuisMenu = false;
 
 // =====================================================================
 // Données
@@ -404,6 +407,21 @@ function afficherAlertes() {
   const alertes = alertesExpiration();
   $('alertes').innerHTML = alertes.map((a) => `<div class="alerte ${a.niveau}">&#9888;&#65039; ${html(a.texte)}</div>`).join('');
   $('alertes').querySelectorAll('.alerte').forEach((el, i) => { el.onclick = alertes[i].ouvrir; });
+  // Demande d'avis après 3 séances
+  const avis = charger(CLES.avis, {});
+  if (seances.length >= 3 && !avis.fait && (!avis.plusTard || aujourdhui() >= avis.plusTard)) {
+    const div = document.createElement('div');
+    div.className = 'alerte rouge avis';
+    div.innerHTML = `<div>&#11088; Tu es content ? Laisse un avis !</div>
+      <div class="boutonsAvis"><a class="petit" href="${PLAY_STORE}" target="_blank" rel="noopener">Laisser un avis</a>
+      <button class="discret">Plus tard</button></div>`;
+    div.querySelector('a').onclick = () => { try { localStorage.setItem(CLES.avis, JSON.stringify({ fait: true })); } catch (e) {} div.remove(); };
+    div.querySelector('button').onclick = () => {
+      try { localStorage.setItem(CLES.avis, JSON.stringify({ plusTard: decalerMois(aujourdhui(), 1) })); } catch (e) {}
+      div.remove();
+    };
+    $('alertes').appendChild(div);
+  }
 }
 
 async function programmerRappels() {
@@ -441,11 +459,11 @@ async function programmerRappels() {
 // =====================================================================
 
 const ECRANS = ['Menu', 'Carnet', 'Form', 'Seance', 'TirForm', 'Ratelier', 'ArmeForm', 'Arme',
-  'Munitions', 'Stands', 'Stand', 'StandForm', 'Controles', 'Licence', 'Demarches', 'Apprendre', 'Infos', 'Papiers', 'PapierForm', 'Papier'];
+  'Munitions', 'Stands', 'Stand', 'StandForm', 'Controles', 'Licence', 'Demarches', 'Apprendre', 'Infos', 'Papiers', 'PapierForm', 'Papier', 'Jeu'];
 const TITRES = {
   menu: 'Tir Coach', carnet: 'Carnet de tir', seance: 'Séance', ratelier: 'Mon râtelier', arme: 'Arme',
   munitions: 'Munitions', stands: 'Stands & ouvertures', stand: 'Stand', controles: 'Tirs de contrôle',
-  licence: 'Licence & certificat', demarches: 'Démarches', apprendre: 'Apprendre', infos: 'À propos', papiers: 'Mes papiers', papier: 'Papier'
+  licence: 'Licence & certificat', demarches: 'Démarches', apprendre: 'Apprendre', infos: 'À propos', papiers: 'Mes papiers', papier: 'Papier', jeu: 'Jeu de précision'
 };
 
 function montrer(nom) {
@@ -470,9 +488,10 @@ function retour() {
     if (!$(id).classList.contains('cache')) { $(id).classList.add('cache'); return true; }
   }
   switch (ecran) {
-    case 'menu': case 'infos': montrer('accueil'); return true;
+    case 'menu': montrer('accueil'); return true;
+    case 'infos': montrer(depuisMenu ? 'menu' : 'accueil'); return true;
     case 'carnet': case 'ratelier': case 'munitions': case 'stands':
-    case 'controles': case 'licence': case 'demarches': case 'apprendre': case 'papiers': montrer('menu'); return true;
+    case 'controles': case 'licence': case 'demarches': case 'apprendre': case 'papiers': case 'jeu': montrer('menu'); return true;
     case 'papier': afficherPapiers(); return true;
     case 'papierform':
       if (papierEnModification && papierActif) ouvrirPapier(papierActif.id); else afficherPapiers();
@@ -764,7 +783,7 @@ function afficherRatelier() {
     div.innerHTML = `
       <img class="miniature" alt="">
       <div class="milieu">
-        <div class="haut">${html(a.nom)}${a.pourRire ? '<span class="badge">pour rire</span>' : ''}</div>
+        <div class="haut">${html(a.nom)}</div>
         <div class="bas">${html(infos)}</div>
       </div>
       <div class="droite"><div class="nb">${pluriel(nb, 'séance')}</div></div>`;
@@ -784,7 +803,7 @@ function ouvrirFormulaireArme(modifier) {
   $('armeCalibre').value = a.calibre;
   $('armeChargeurs').value = a.chargeurs;
   $('armeNotes').value = a.notes;
-  $('armeRire').innerHTML = '<option value="">— choisir pour rire —</option>' +
+  $('armeRire').innerHTML = '<option value="">— choisir —</option>' +
     ARMES_POUR_RIRE.map((n) => `<option>${html(n)}</option>`).join('');
   $('zoneRire').classList.toggle('cache', a.categorie !== 'A');
   montrer('armeform');
@@ -912,8 +931,6 @@ $('armeCategorie').addEventListener('change', () => {
 $('armeRire').addEventListener('change', () => {
   if (!$('armeRire').value) return;
   $('armeNom').value = $('armeRire').value;
-  $('armeCalibre').value = 'Pour rire';
-  if (!$('armeNotes').value) $('armeNotes').value = 'Arme de catégorie A… pour rire 😄';
 });
 
 // =====================================================================
@@ -1420,6 +1437,107 @@ function verifierAccord() {
 }
 
 // =====================================================================
+// Jeu de précision (repris du site du T.A.A., scores en local)
+// =====================================================================
+
+const jeu = { coups: [], score: 0, fini: true, ph: [], lance: false };
+
+function viseurJeu(t) {
+  const c = $('jCible'), R = c.width / 2 - 12, CX = c.width / 2, s = t / 1000 * 1.35, a = R * 0.42, ph = jeu.ph;
+  return [CX + a * (0.55 * Math.sin(s * 1.3 + ph[0]) + 0.3 * Math.sin(s * 3.7 + ph[1]) + 0.15 * Math.sin(s * 8.1)),
+          CX + a * (0.55 * Math.cos(s * 1.1 + ph[2]) + 0.3 * Math.sin(s * 4.3 + ph[3]) + 0.15 * Math.cos(s * 7.3))];
+}
+
+function pointsJeu(px, py) {
+  const c = $('jCible'), R = c.width / 2 - 12, CX = c.width / 2;
+  const p = 10 - Math.floor(Math.hypot(px - CX, py - CX) / (R / 10));
+  return p < 0 ? 0 : p;
+}
+
+function dessinJeu(t) {
+  const c = $('jCible'), x = c.getContext('2d'), W = c.width, R = W / 2 - 12, CX = W / 2;
+  x.clearRect(0, 0, W, W);
+  for (let k = 10; k >= 1; k--) {
+    const r = R * k / 10;
+    x.beginPath(); x.arc(CX, CX, r, 0, 7);
+    x.fillStyle = k <= 4 ? '#111' : '#f4f1e8'; x.fill();
+    x.lineWidth = 1.2; x.strokeStyle = k <= 4 ? '#eee' : '#333'; x.stroke();
+    if (k > 1) {
+      x.fillStyle = k <= 4 ? '#eee' : '#333'; x.font = (R / 16) + 'px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText(11 - k, CX + r - R / 20, CX);
+    }
+  }
+  jeu.coups.forEach((p) => { x.beginPath(); x.arc(p[0], p[1], 7, 0, 7); x.fillStyle = '#d62828'; x.fill(); x.lineWidth = 2; x.strokeStyle = '#fff'; x.stroke(); });
+  if (!jeu.fini) {
+    const v = viseurJeu(t);
+    x.strokeStyle = '#d62828'; x.lineWidth = 2.5;
+    x.beginPath(); x.arc(v[0], v[1], 26, 0, 7); x.stroke();
+    x.beginPath();
+    x.moveTo(v[0] - 40, v[1]); x.lineTo(v[0] - 10, v[1]); x.moveTo(v[0] + 10, v[1]); x.lineTo(v[0] + 40, v[1]);
+    x.moveTo(v[0], v[1] - 40); x.lineTo(v[0], v[1] - 10); x.moveTo(v[0], v[1] + 10); x.lineTo(v[0], v[1] + 40);
+    x.stroke();
+  }
+  if (ecran === 'jeu') requestAnimationFrame(dessinJeu); else jeu.lance = false;
+}
+
+function nouvellePartie() {
+  jeu.coups = []; jeu.score = 0; jeu.fini = false;
+  jeu.ph = [0, 0, 0, 0].map(() => Math.random() * 9);
+  $('jScore').textContent = '0';
+  $('jCoup').textContent = '1';
+  $('jTir').classList.remove('cache');
+  $('jFin').classList.add('cache');
+}
+
+function ouvrirJeu() {
+  nouvellePartie();
+  afficherScores();
+  montrer('jeu');
+  if (!jeu.lance) { jeu.lance = true; requestAnimationFrame(dessinJeu); }
+}
+
+function tirerJeu() {
+  if (jeu.fini) return;
+  const v = viseurJeu(performance.now());
+  jeu.coups.push(v);
+  jeu.score += pointsJeu(v[0], v[1]);
+  $('jScore').textContent = jeu.score;
+  if (jeu.coups.length >= 5) {
+    jeu.fini = true;
+    $('jTotal').textContent = jeu.score + ' / 50';
+    $('jMot').textContent = jeu.score >= 45 ? '🏅 Tireur d\'élite !' : jeu.score >= 38 ? '👏 Très beau groupement !'
+      : jeu.score >= 28 ? '👍 Pas mal, continue !' : '😅 Le stand t\'attend pour progresser !';
+    $('jNom').value = charger('tircoach-pseudo', '');
+    $('jEnregistrer').classList.remove('cache');
+    $('jTir').classList.add('cache');
+    $('jFin').classList.remove('cache');
+  } else {
+    $('jCoup').textContent = jeu.coups.length + 1;
+  }
+}
+
+function afficherScores() {
+  const scores = charger(CLES.scores, []);
+  $('jClassement').innerHTML = scores.length
+    ? scores.slice(0, 10).map((e, i) => `<li><span class="rang">${['🥇', '🥈', '🥉'][i] || (i + 1)}</span><span class="nom">${html(e.nom)}</span><b>${e.score}</b></li>`).join('')
+    : '<li class="aide">Aucun score pour l\'instant. À toi de jouer !</li>';
+}
+
+function enregistrerScore() {
+  const nom = $('jNom').value.trim() || 'Moi';
+  const scores = charger(CLES.scores, []);
+  scores.push({ nom, score: jeu.score, date: aujourdhui() });
+  scores.sort((a, b) => b.score - a.score);
+  try {
+    localStorage.setItem(CLES.scores, JSON.stringify(scores.slice(0, 50)));
+    localStorage.setItem('tircoach-pseudo', JSON.stringify(nom));
+  } catch (e) {}
+  $('jEnregistrer').classList.add('cache');
+  afficherScores();
+  message('Score enregistré');
+}
+
+// =====================================================================
 // Apprendre
 // =====================================================================
 
@@ -1460,6 +1578,8 @@ document.querySelectorAll('.tuile').forEach((t) => {
       case 'demarches': montrer('demarches'); break;
       case 'apprendre': afficherApprendre(); break;
       case 'papiers': afficherPapiers(); break;
+      case 'jeu': ouvrirJeu(); break;
+      case 'infos': depuisMenu = true; montrer('infos'); break;
       default: message('Cette partie arrive bientôt.');
     }
   };
@@ -1506,8 +1626,12 @@ if (natif && P.App) {
   P.App.addListener('backButton', () => { if (!retour()) P.App.exitApp(); });
 }
 
-$('btnInfos').onclick = () => montrer('infos');
+$('btnInfos').onclick = () => { depuisMenu = false; montrer('infos'); };
 $('btnPartager').onclick = partagerAppli;
+$('jTir').onclick = tirerJeu;
+$('jCible').onclick = tirerJeu;
+$('jRejouer').onclick = nouvellePartie;
+$('jEnregistrer').onclick = enregistrerScore;
 $('btnExporter').onclick = exporterSauvegarde;
 $('btnRestaurer').onclick = () => $('fichierRestauration').click();
 $('fichierRestauration').onchange = (e) => { if (e.target.files[0]) restaurerSauvegarde(e.target.files[0]); e.target.value = ''; };
