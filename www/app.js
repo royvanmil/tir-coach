@@ -619,7 +619,9 @@ async function programmerRappels() {
             id: id++,
             title: 'Tir Coach',
             body: `${e.texte} expire dans ${mois} mois (le ${dateFr(e.fin)}).`,
-            schedule: { at: jour, allowWhileIdle: true }
+            schedule: { at: jour, allowWhileIdle: true },
+            // Rappels des mois à l'avance : pas besoin d'alarme exacte (sinon Android ouvre « Alarmes et rappels »)
+            isExactNotification: false
           });
         }
       });
