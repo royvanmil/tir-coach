@@ -11,7 +11,7 @@
 
 const ORIGINES = ['https://royvanmil.fr', 'https://www.royvanmil.fr'];
 const MAX_PAR_PERSONNE = 2;
-const COMPTEURS = ['tircoach-page', 'tircoach-telechargement', 'tircoach-testeur', 'tircoach-avis-page', 'tircoach-avis-envoi'];
+const COMPTEURS = ['tircoach-page', 'tircoach-telechargement', 'tircoach-testeur', 'tircoach-avis-page', 'tircoach-avis-envoi', 'tircoach-testeur-page'];
 
 function jourParis(decalage = 0) {
   const d = new Date(Date.now() - decalage * 86400000);
