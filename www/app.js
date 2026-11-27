@@ -76,6 +76,11 @@ const ARMES_POUR_RIRE = [
 ];
 
 const PLAY_STORE = 'https://play.google.com/store/apps/details?id=fr.royvanmil.tircoach';
+// Tant que l'appli n'est pas sur Google Play : partage du site, avis par mail
+const SUR_PLAY_STORE = false;
+const SITE_APPLI = 'https://royvanmil.fr/tir-coach/';
+const LIEN_PARTAGE = SUR_PLAY_STORE ? PLAY_STORE : SITE_APPLI;
+const LIEN_AVIS = SUR_PLAY_STORE ? PLAY_STORE : 'https://royvanmil.fr/tir-coach/avis.html';
 
 const imageCalibre = (id) => (id && id !== 'autre' ? `images/calibres/${id}.svg` : '');
 
@@ -418,7 +423,7 @@ function afficherAlertes() {
     const div = document.createElement('div');
     div.className = 'alerte rouge avis';
     div.innerHTML = `<div>&#11088; Tu es content ? Laisse un avis !</div>
-      <div class="boutonsAvis"><a class="petit" href="${PLAY_STORE}" target="_blank" rel="noopener">Laisser un avis</a>
+      <div class="boutonsAvis"><a class="petit" href="${LIEN_AVIS}" target="_blank" rel="noopener">Laisser un avis</a>
       <button class="discret">Plus tard</button></div>`;
     div.querySelector('a').onclick = () => { try { localStorage.setItem(CLES.avis, JSON.stringify({ fait: true })); } catch (e) {} div.remove(); };
     div.querySelector('button').onclick = () => {
@@ -1393,10 +1398,10 @@ async function supprimerPapier() {
 async function partagerAppli() {
   const texte = "Tir Coach : le carnet de tir gratuit et 100 % local (séances, cibles, râtelier, munitions, licence…). À télécharger ici :";
   try {
-    if (natif && P.Share) { await P.Share.share({ title: 'Tir Coach', text: texte, url: PLAY_STORE, dialogTitle: "Partager Tir Coach" }); return; }
-    if (navigator.share) { await navigator.share({ title: 'Tir Coach', text: texte, url: PLAY_STORE }); return; }
+    if (natif && P.Share) { await P.Share.share({ title: 'Tir Coach', text: texte, url: LIEN_PARTAGE, dialogTitle: "Partager Tir Coach" }); return; }
+    if (navigator.share) { await navigator.share({ title: 'Tir Coach', text: texte, url: LIEN_PARTAGE }); return; }
   } catch (e) { return; }
-  message(PLAY_STORE);
+  message(LIEN_PARTAGE);
 }
 
 async function exporterSauvegarde() {
@@ -1637,6 +1642,11 @@ if (natif && P.App) {
 }
 
 $('carteMerci').classList.toggle('cache', !AFFICHER_TAA);
+document.querySelectorAll('.lienAvis').forEach((a) => { a.href = LIEN_AVIS; });
+$('qrAppli').src = SUR_PLAY_STORE ? 'images/qr-playstore.svg' : 'images/qr-site.svg';
+$('texteAvis').textContent = SUR_PLAY_STORE
+  ? "Roy VAN MIL sera content de connaître ton avis. Laisse une petite note sur le Play Store, et partage l'appli avec tes amis du tir."
+  : "Roy VAN MIL sera content de connaître ton avis. Donne-lui une note sur 10 sur la page des avis, et partage l'appli avec tes amis du tir.";
 $('btnInfos').onclick = () => { depuisMenu = false; montrer('infos'); };
 $('btnPartager').onclick = partagerAppli;
 $('jTir').onclick = tirerJeu;
