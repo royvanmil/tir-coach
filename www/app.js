@@ -643,6 +643,7 @@ const TITRES = {
 };
 
 function montrer(nom) {
+  const memeEcran = nom === ecran; // même écran redessiné après une action : on garde la position
   ecran = nom;
   $('ecranAccueil').classList.toggle('cache', nom !== 'accueil');
   $('entete').classList.toggle('cache', nom === 'accueil');
@@ -657,7 +658,7 @@ function montrer(nom) {
   };
   $('titre').textContent = titres[nom] || TITRES[nom] || 'Tir Coach';
   if (nom === 'menu') afficherAlertes();
-  window.scrollTo(0, 0);
+  if (!memeEcran) window.scrollTo(0, 0);
 }
 
 function retour() {
@@ -1280,8 +1281,8 @@ function afficherMunitions() {
     div.querySelectorAll('.boutons button').forEach((b) => {
       b.onclick = async () => {
         m.quantite = Math.max(0, (parseInt(m.quantite, 10) || 0) + parseInt(b.dataset.d, 10));
+        div.querySelector('.qte').textContent = m.quantite; // mise à jour sur place, la page ne bouge pas
         await sauver();
-        afficherMunitions();
       };
     });
     div.querySelector('.qte').onclick = async () => {
