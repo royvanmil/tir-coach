@@ -43,15 +43,19 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug bundleRelease --no-daemon
 
       - name: Renommer
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk TirCoach.apk
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk TirCoach.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab TirCoach-PlayStore.aab
 
       - name: Publier dans Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: Tir Coach - version ${{ github.run_number }}
-          files: TirCoach.apk
+          files: |
+            TirCoach.apk
+            TirCoach-PlayStore.aab
           make_latest: true

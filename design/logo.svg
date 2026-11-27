@@ -9,5 +9,9 @@
   </g>
   <circle cx="256" cy="256" r="66" fill="#e0a32e"/>
   <circle cx="256" cy="256" r="14" fill="#14171c"/>
-  <circle cx="318" cy="200" r="13" fill="#14171c" stroke="#e0a32e" stroke-width="5"/>
+  <g fill="#d62828" stroke="#14171c" stroke-width="6">
+    <circle cx="318" cy="196" r="28"/>
+    <circle cx="186" cy="214" r="28"/>
+    <circle cx="286" cy="338" r="28"/>
+  </g>
 </svg>
