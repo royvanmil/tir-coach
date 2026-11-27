@@ -261,3 +261,53 @@ input, select, textarea {
   border-radius: 10px;
   z-index: 30;
 }
+
+/* ---------- V4 : séances multi-armes, note, stands, licence ---------- */
+
+.etiquette { color: var(--gris); font-size: 15px; margin-bottom: 6px; }
+.notes10 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.notes10 button {
+  background: var(--carte); border: 1px solid var(--bord); color: var(--texte);
+  border-radius: 10px; padding: 12px 0; font-weight: 700; font-size: 17px;
+}
+.notes10 button.choisi { background: var(--or); color: #111; border-color: var(--or); }
+.badgeNote {
+  display: inline-block; background: var(--or); color: #111; font-weight: 700;
+  border-radius: 8px; padding: 2px 8px; font-size: 15px;
+}
+.tir .entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.tir .actions { display: flex; gap: 8px; margin-top: 10px; }
+.tir .actions button { flex: 1; }
+.tir .grille { margin-top: 10px; }
+.centre { text-align: center; }
+
+.fiche .ligne { margin-top: 10px; }
+.fiche .ligne b { color: var(--or); display: block; font-size: 14px; margin-bottom: 2px; }
+.fiche .ligne span { white-space: pre-wrap; }
+.badge { font-size: 12px; color: var(--gris); border: 1px solid var(--bord); border-radius: 6px; padding: 1px 6px; margin-left: 6px; }
+
+.controle.fait { opacity: 0.6; }
+.controle .coche {
+  background: none; border: 2px solid var(--or); color: var(--or);
+  border-radius: 10px; padding: 8px 12px; font-weight: 700;
+}
+.controle.fait .coche { background: var(--or); color: #111; }
+.compteur { font-size: 26px; font-weight: 700; color: var(--or); }
+
+.numeroLicence {
+  background: var(--carte); border: 2px solid var(--or); color: var(--or);
+  border-radius: 16px; padding: 22px; font-size: 32px; font-weight: 800; letter-spacing: 3px;
+}
+.imageLicence { width: 100%; border-radius: 12px; border: 1px solid var(--bord); }
+#grandNumero {
+  position: fixed; inset: 0; background: #fff; z-index: 25;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+}
+#grandNumero .petitTitre { color: #333; font-size: 22px; margin: 0; }
+#grandNumeroTexte {
+  color: #000; font-size: 22vw; font-weight: 800; margin: 10px 0; letter-spacing: 2px;
+  white-space: nowrap; text-align: center; line-height: 1;
+}
+#grandNumero .aide { color: #666; }
+
+.controle .supprStock { background: none; border: none; color: var(--gris); font-size: 13px; margin-top: 6px; padding: 0; }

@@ -28,11 +28,11 @@
       <button class="tuile" data-va="carnet"><span>&#128214;</span>Carnet de tir</button>
       <button class="tuile" data-va="ratelier"><span>&#128452;&#65039;</span>Mon râtelier</button>
       <button class="tuile" data-va="munitions"><span>&#128230;</span>Munitions</button>
+      <button class="tuile" data-va="stands"><span>&#128197;</span>Stands &amp; ouvertures</button>
+      <button class="tuile" data-va="controles"><span>&#9989;</span>Tirs de contrôle</button>
+      <button class="tuile" data-va="licence"><span>&#129706;</span>Ma licence</button>
       <button class="tuile" data-va="demarches"><span>&#127963;&#65039;</span>Démarches</button>
-      <button class="tuile bientot"><span>&#128197;</span>Ouvertures du stand<small>Bientôt</small></button>
-      <button class="tuile bientot"><span>&#9989;</span>Tirs de contrôle<small>Bientôt</small></button>
       <button class="tuile bientot"><span>&#128193;</span>Mes papiers<small>Bientôt</small></button>
-      <button class="tuile bientot"><span>&#129706;</span>Ma licence<small>Bientôt</small></button>
     </div>
     <p class="info">Tout reste sur ton téléphone.<br>Photos et sauvegarde : <b>Documents/TirCoach</b></p>
   </main>
@@ -51,42 +51,51 @@
       <input type="text" id="champLieu" list="listeLieux" placeholder="ex. TAA Eauze">
       <datalist id="listeLieux"></datalist>
     </label>
-    <label>Arme
-      <input type="text" id="champArme" list="listeArmes" placeholder="ex. Glock 17">
-      <datalist id="listeArmes"></datalist>
-    </label>
-    <label>Munitions (marque, type)
-      <input type="text" id="champMunition" list="listeMunitions" placeholder="ex. Geco 9 mm FMJ 124 gr">
-      <datalist id="listeMunitions"></datalist>
-    </label>
-    <div class="ligne2">
-      <label>Nombre de coups
-        <input type="number" id="champCoups" inputmode="numeric" placeholder="ex. 50">
-      </label>
-      <label>Distance (m)
-        <input type="number" id="champDistance" inputmode="numeric" value="25">
-      </label>
+    <div>
+      <div class="etiquette">Note de la séance (1 à 10)</div>
+      <div id="choixNote" class="notes10"></div>
     </div>
-    <label>Cible
-      <select id="champCible">
-        <option>C50</option>
-        <option>C200</option>
-        <option>TAR</option>
-        <option>Autre</option>
-      </select>
-    </label>
     <label>Notes
-      <textarea id="champNotes" rows="3" placeholder="Ressenti, réglages, météo…"></textarea>
+      <textarea id="champNotes" rows="3" placeholder="Ressenti, météo, réglages…"></textarea>
     </label>
     <button id="btnEnregistrer" class="gros">Enregistrer</button>
   </main>
 
   <main id="ecranSeance" class="cache">
     <div id="resumeSeance" class="carte"></div>
-    <button id="btnModifier" class="discret">Modifier les infos</button>
-    <button id="btnPhoto" class="gros">&#128247; Prendre une photo de cible</button>
-    <div id="grillePhotos" class="grille"></div>
+    <button id="btnModifier" class="discret">Modifier la séance</button>
+    <div id="listeTirs" class="liste"></div>
+    <button id="btnAjoutTir" class="gros">+ Ajouter une arme tirée</button>
     <button id="btnSupprimer" class="discret">Supprimer la séance du carnet</button>
+  </main>
+
+  <main id="ecranTirForm" class="cache">
+    <label>Arme
+      <input type="text" id="tirArme" list="listeArmes" placeholder="ex. Glock 17">
+      <datalist id="listeArmes"></datalist>
+    </label>
+    <label>Munitions (marque, type)
+      <input type="text" id="tirMunition" list="listeMunitions" placeholder="ex. Geco 9 mm FMJ 124 gr">
+      <datalist id="listeMunitions"></datalist>
+    </label>
+    <div class="ligne2">
+      <label>Nombre tiré
+        <input type="number" id="tirCoups" inputmode="numeric" placeholder="ex. 50">
+      </label>
+      <label>Distance (m)
+        <input type="number" id="tirDistance" inputmode="numeric" value="25">
+      </label>
+    </div>
+    <label>Cible
+      <select id="tirCible">
+        <option>C50</option>
+        <option>C200</option>
+        <option>TAR</option>
+        <option>Autre</option>
+      </select>
+    </label>
+    <button id="btnEnregistrerTir" class="gros">Enregistrer</button>
+    <button id="btnSupprimerTir" class="discret">Retirer cette arme de la séance</button>
   </main>
 
   <!-- ===== RÂTELIER ===== -->
@@ -161,6 +170,75 @@
     </div>
   </main>
 
+  <!-- ===== STANDS ===== -->
+  <main id="ecranStands" class="cache">
+    <p class="aide">Choisis ton stand pour voir les horaires et les infos.</p>
+    <div id="listeStands" class="liste"></div>
+    <button id="btnNouveauStand" class="gros">+ Ajouter un stand</button>
+  </main>
+
+  <main id="ecranStand" class="cache">
+    <div id="ficheStand" class="carte"></div>
+    <button id="btnModifierStand" class="discret">Modifier ce stand</button>
+    <button id="btnProposerStand" class="discret">&#9993;&#65039; Proposer ce stand pour la prochaine mise à jour</button>
+    <button id="btnSupprimerStand" class="discret">Supprimer ce stand</button>
+  </main>
+
+  <main id="ecranStandForm" class="cache">
+    <label>Nom du stand
+      <input type="text" id="standNom" placeholder="ex. Club de tir de …">
+    </label>
+    <label>Adresse
+      <textarea id="standAdresse" rows="2"></textarea>
+    </label>
+    <label>Horaires d'ouverture
+      <textarea id="standHoraires" rows="4" placeholder="ex. Mercredi, samedi, dimanche 9h–18h"></textarea>
+    </label>
+    <label>Distances / pas de tir
+      <input type="text" id="standDistances" placeholder="ex. 10 m, 25 m, 50 m">
+    </label>
+    <label>Contact
+      <textarea id="standContact" rows="2"></textarea>
+    </label>
+    <label>Notes
+      <textarea id="standNotes" rows="2"></textarea>
+    </label>
+    <button id="btnEnregistrerStand" class="gros">Enregistrer</button>
+  </main>
+
+  <!-- ===== TIRS DE CONTRÔLE ===== -->
+  <main id="ecranControles" class="cache">
+    <div id="compteurControles" class="carte"></div>
+    <label>Stand
+      <select id="controleStand"></select>
+    </label>
+    <div id="listeControles" class="liste"></div>
+    <div class="carte formStock">
+      <div class="haut">Ajouter une date</div>
+      <input type="date" id="controleDate">
+      <input type="text" id="controleNotes" placeholder="Heure, infos… (facultatif)">
+      <button id="btnAjoutControle" class="gros">Ajouter</button>
+    </div>
+    <button id="btnProposerControles" class="discret">&#9993;&#65039; Proposer ces dates pour la prochaine mise à jour</button>
+  </main>
+
+  <!-- ===== LICENCE ===== -->
+  <main id="ecranLicence" class="cache">
+    <button id="btnNumeroGrand" class="numeroLicence">—</button>
+    <p class="aide centre">Appuie sur le numéro pour l'afficher en grand.</p>
+    <label>Numéro de licence
+      <input type="text" id="licenceNumero" inputmode="numeric" placeholder="ex. 1234567">
+    </label>
+    <label>Valable jusqu'au
+      <input type="date" id="licenceFin">
+    </label>
+    <button id="btnEnregistrerLicence" class="gros">Enregistrer</button>
+    <h2>Image de la licence</h2>
+    <p class="aide">Télécharge ta licence sur EDEN (eden.fftir.org), fais une capture ou garde l'image dans ta galerie, puis choisis-la ici.</p>
+    <img id="imageLicence" class="imageLicence cache" alt="Licence">
+    <button id="btnChoisirLicence" class="gros">&#128444;&#65039; Choisir l'image de ma licence</button>
+  </main>
+
   <!-- ===== DÉMARCHES ===== -->
   <main id="ecranDemarches" class="cache">
     <div class="carte demarche">
@@ -173,7 +251,7 @@
         <li>Les infos de ton club</li>
       </ul>
       <p class="aide">Connexion avec ton numéro de licence et ton mot de passe.</p>
-      <a class="gros lien" href="https://eden-fftir.fr/" target="_blank" rel="noopener">Ouvrir EDEN</a>
+      <a class="gros lien" href="https://eden.fftir.org/" target="_blank" rel="noopener">Ouvrir EDEN</a>
     </div>
     <div class="carte demarche">
       <div class="haut">SIA — Ministère de l'Intérieur</div>
@@ -192,6 +270,13 @@
   <div id="visionneuse" class="cache">
     <img id="imageGrande" alt="">
     <p id="nomGrand"></p>
+  </div>
+
+  <!-- Numéro de licence en grand -->
+  <div id="grandNumero" class="cache">
+    <p class="petitTitre">Licence FFTir</p>
+    <p id="grandNumeroTexte"></p>
+    <p class="aide">Appuie pour fermer</p>
   </div>
 
   <div id="message" class="cache"></div>
