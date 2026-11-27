@@ -14,6 +14,7 @@
     <h1 class="titreAccueil">TIR COACH</h1>
     <p class="sousTitre">Ton carnet de tir</p>
     <button id="btnEntrer" class="gros">Entrer dans le stand</button>
+    <p class="signature">Roy VAN MIL</p>
   </section>
 
   <header id="entete" class="cache">
@@ -25,22 +26,23 @@
   <main id="ecranMenu" class="cache">
     <div class="tuiles">
       <button class="tuile" data-va="carnet"><span>&#128214;</span>Carnet de tir</button>
+      <button class="tuile" data-va="ratelier"><span>&#128452;&#65039;</span>Mon râtelier</button>
+      <button class="tuile" data-va="munitions"><span>&#128230;</span>Munitions</button>
+      <button class="tuile" data-va="demarches"><span>&#127963;&#65039;</span>Démarches</button>
       <button class="tuile bientot"><span>&#128197;</span>Ouvertures du stand<small>Bientôt</small></button>
       <button class="tuile bientot"><span>&#9989;</span>Tirs de contrôle<small>Bientôt</small></button>
-      <button class="tuile bientot"><span>&#128452;&#65039;</span>Mon râtelier<small>Bientôt</small></button>
       <button class="tuile bientot"><span>&#128193;</span>Mes papiers<small>Bientôt</small></button>
       <button class="tuile bientot"><span>&#129706;</span>Ma licence<small>Bientôt</small></button>
     </div>
     <p class="info">Tout reste sur ton téléphone.<br>Photos et sauvegarde : <b>Documents/TirCoach</b></p>
   </main>
 
-  <!-- Carnet : liste des séances -->
+  <!-- ===== CARNET ===== -->
   <main id="ecranCarnet" class="cache">
     <button id="btnNouvelle" class="gros">+ Nouvelle séance</button>
-    <div id="listeSeances"></div>
+    <div id="listeSeances" class="liste"></div>
   </main>
 
-  <!-- Formulaire séance (nouvelle ou modifier) -->
   <main id="ecranForm" class="cache">
     <label>Date
       <input type="date" id="champDate">
@@ -79,13 +81,111 @@
     <button id="btnEnregistrer" class="gros">Enregistrer</button>
   </main>
 
-  <!-- Détail d'une séance -->
   <main id="ecranSeance" class="cache">
     <div id="resumeSeance" class="carte"></div>
     <button id="btnModifier" class="discret">Modifier les infos</button>
     <button id="btnPhoto" class="gros">&#128247; Prendre une photo de cible</button>
-    <div id="grillePhotos"></div>
+    <div id="grillePhotos" class="grille"></div>
     <button id="btnSupprimer" class="discret">Supprimer la séance du carnet</button>
+  </main>
+
+  <!-- ===== RÂTELIER ===== -->
+  <main id="ecranRatelier" class="cache">
+    <button id="btnNouvelleArme" class="gros">+ Ajouter une arme</button>
+    <div id="listeArmesRatelier" class="liste"></div>
+  </main>
+
+  <main id="ecranArmeForm" class="cache">
+    <label>Nom de l'arme
+      <input type="text" id="armeNom" placeholder="ex. Glock 17 Gen5">
+    </label>
+    <div class="ligne2">
+      <label>Catégorie
+        <select id="armeCategorie">
+          <option value="">—</option>
+          <option>A1</option>
+          <option>B</option>
+          <option>C</option>
+          <option>D</option>
+        </select>
+      </label>
+      <label>Calibre
+        <input type="text" id="armeCalibre" placeholder="ex. 9 mm">
+      </label>
+    </div>
+    <label>Nombre de chargeurs
+      <input type="number" id="armeChargeurs" inputmode="numeric" placeholder="ex. 3">
+    </label>
+    <label>Notes
+      <textarea id="armeNotes" rows="3" placeholder="Infos utiles…"></textarea>
+    </label>
+    <button id="btnEnregistrerArme" class="gros">Enregistrer</button>
+  </main>
+
+  <main id="ecranArme" class="cache">
+    <div id="resumeArme" class="carte"></div>
+    <button id="btnModifierArme" class="discret">Modifier les infos</button>
+    <button id="btnPhotoArme" class="gros">&#128247; Ajouter une photo</button>
+    <div id="grillePhotosArme" class="grille"></div>
+
+    <h2>Modifications</h2>
+    <p class="aide">Organes de visée, détente, poignée…</p>
+    <div id="listeModifs" class="journal"></div>
+    <div class="ajout">
+      <input type="date" id="modifDate">
+      <input type="text" id="modifTexte" placeholder="ex. Détente allégée 2 kg">
+      <button id="btnAjoutModif" class="petit">Ajouter</button>
+    </div>
+
+    <h2>Entretien</h2>
+    <p class="aide">Nettoyage, pièces changées…</p>
+    <div id="listeEntretiens" class="journal"></div>
+    <div class="ajout">
+      <input type="date" id="entretienDate">
+      <input type="text" id="entretienTexte" placeholder="ex. Nettoyage complet + huile">
+      <button id="btnAjoutEntretien" class="petit">Ajouter</button>
+    </div>
+
+    <button id="btnSupprimerArme" class="discret">Retirer l'arme du râtelier</button>
+  </main>
+
+  <!-- ===== MUNITIONS ===== -->
+  <main id="ecranMunitions" class="cache">
+    <p class="aide">Ton stock à la maison. Appuie sur le nombre pour le changer.</p>
+    <div id="listeStock" class="liste"></div>
+    <div class="carte formStock">
+      <div class="haut">Ajouter une munition</div>
+      <input type="text" id="stockNom" placeholder="ex. Geco 9 mm FMJ 124 gr">
+      <input type="number" id="stockQte" inputmode="numeric" placeholder="Quantité">
+      <button id="btnAjoutStock" class="gros">Ajouter</button>
+    </div>
+  </main>
+
+  <!-- ===== DÉMARCHES ===== -->
+  <main id="ecranDemarches" class="cache">
+    <div class="carte demarche">
+      <div class="haut">EDEN — FFTir</div>
+      <p>L'Espace Dématérialisé d'Enregistrement National de la Fédération Française de Tir.</p>
+      <ul>
+        <li>Ta licence dématérialisée, avec son QR code</li>
+        <li>Tes informations de licencié</li>
+        <li>Ton certificat médical et ta photo</li>
+        <li>Les infos de ton club</li>
+      </ul>
+      <p class="aide">Connexion avec ton numéro de licence et ton mot de passe.</p>
+      <a class="gros lien" href="https://eden-fftir.fr/" target="_blank" rel="noopener">Ouvrir EDEN</a>
+    </div>
+    <div class="carte demarche">
+      <div class="haut">SIA — Ministère de l'Intérieur</div>
+      <p>Le Système d'Information sur les Armes : ton espace officiel de détenteur.</p>
+      <ul>
+        <li>Les armes que tu détiens (catégories B et C)</li>
+        <li>Tes demandes d'autorisation et déclarations</li>
+        <li>Ta carte européenne d'armes à feu</li>
+        <li>La mise à jour de ta licence chaque saison</li>
+      </ul>
+      <a class="gros lien" href="https://sia.detenteurs.interieur.gouv.fr/" target="_blank" rel="noopener">Ouvrir le SIA</a>
+    </div>
   </main>
 
   <!-- Photo en grand -->

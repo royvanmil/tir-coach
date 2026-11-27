@@ -5,6 +5,7 @@
   --texte: #f2f2f2;
   --gris: #9aa3ae;
   --or: #e0a32e;
+  --rouge: #d62828;
 }
 
 * { box-sizing: border-box; }
@@ -33,11 +34,23 @@ button { font: inherit; cursor: pointer; }
   gap: 10px;
   padding: 30px;
   text-align: center;
+  position: relative;
 }
 .logoAccueil { width: 58vw; max-width: 260px; margin-bottom: 20px; }
 .titreAccueil { margin: 0; font-size: 34px; letter-spacing: 6px; color: var(--or); }
 .sousTitre { margin: 0 0 40px; color: var(--gris); }
 #ecranAccueil .gros { width: 100%; max-width: 360px; }
+.signature {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  margin: 0;
+  color: var(--gris);
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
 
 /* ---------- En-tête ---------- */
 
@@ -56,9 +69,15 @@ h1#titre { margin: 0; font-size: 22px; color: var(--or); letter-spacing: 1px; }
 
 main { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
+h2 { margin: 14px 0 0; font-size: 19px; color: var(--or); }
+.aide { margin: 0; color: var(--gris); font-size: 14px; }
+
 /* ---------- Boutons ---------- */
 
 .gros {
+  display: block;
+  text-align: center;
+  text-decoration: none;
   background: var(--or);
   color: #111;
   border: none;
@@ -66,6 +85,14 @@ main { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
   padding: 16px;
   font-weight: 700;
   font-size: 18px;
+}
+.petit {
+  background: var(--or);
+  color: #111;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
 }
 .icone {
   background: none;
@@ -95,7 +122,7 @@ main { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
   border-radius: 16px;
   color: var(--texte);
   padding: 18px 10px;
-  min-height: 120px;
+  min-height: 116px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,7 +151,7 @@ input, select, textarea {
 }
 .ligne2 { display: flex; gap: 12px; }
 
-/* ---------- Cartes ---------- */
+/* ---------- Cartes et listes ---------- */
 
 .carte {
   background: var(--carte);
@@ -136,19 +163,25 @@ input, select, textarea {
 .carte .bas { color: var(--gris); font-size: 15px; margin-top: 4px; }
 .carte .notes { color: var(--texte); font-size: 15px; margin-top: 8px; white-space: pre-wrap; }
 
-.seance { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.seance .droite { text-align: right; white-space: nowrap; }
-.seance .score { color: var(--or); font-weight: 700; font-size: 20px; }
-.seance .nb { color: var(--gris); font-size: 14px; }
+.liste { display: flex; flex-direction: column; gap: 10px; }
 
-#listeSeances { display: flex; flex-direction: column; gap: 10px; }
+.ligneListe { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.ligneListe .droite { text-align: right; white-space: nowrap; }
+.ligneListe .score { color: var(--or); font-weight: 700; font-size: 20px; }
+.ligneListe .nb { color: var(--gris); font-size: 14px; }
+.miniature {
+  width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
+  background: #000; flex-shrink: 0;
+}
+.ligneListe .milieu { flex: 1; min-width: 0; }
+
 .vide { color: var(--gris); text-align: center; padding: 30px 0; }
 .info { color: var(--gris); font-size: 13px; text-align: center; }
 .total { color: var(--or); font-weight: 700; margin-top: 8px; }
 
 /* ---------- Photos ---------- */
 
-#grillePhotos {
+.grille {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
@@ -164,6 +197,44 @@ input, select, textarea {
 .vignette .zoneScore { display: flex; align-items: center; gap: 6px; padding: 6px; }
 .vignette .zoneScore span { color: var(--gris); font-size: 14px; }
 .vignette .zoneScore input { padding: 8px; font-size: 16px; }
+
+/* ---------- Journaux (modifs, entretien) ---------- */
+
+.journal { display: flex; flex-direction: column; gap: 8px; }
+.entree {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--carte); border: 1px solid var(--bord); border-radius: 10px; padding: 10px;
+}
+.entree .date { color: var(--or); font-size: 14px; white-space: nowrap; padding-top: 2px; }
+.entree .texte { flex: 1; white-space: pre-wrap; }
+.entree .suppr { background: none; border: none; color: var(--gris); font-size: 18px; padding: 0 4px; }
+.ajout { display: grid; grid-template-columns: 1fr; gap: 8px; }
+
+/* ---------- Munitions ---------- */
+
+.stock .nomStock { font-weight: 700; }
+.stock .qte {
+  background: none; border: 2px solid var(--or); color: var(--or);
+  border-radius: 12px; font-size: 22px; font-weight: 700; padding: 6px 14px; min-width: 80px;
+}
+.stock .boutons { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.stock .boutons button {
+  flex: 1; background: var(--fond); border: 1px solid var(--bord); color: var(--texte);
+  border-radius: 10px; padding: 10px 0; font-weight: 600;
+}
+.stock .boutons .moins { color: #ff8a8a; }
+.stock .boutons .plus { color: #8fe08f; }
+.stock .supprStock { background: none; border: none; color: var(--gris); font-size: 13px; margin-top: 8px; padding: 0; }
+.formStock { display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- Démarches ---------- */
+
+.demarche p { margin: 8px 0; }
+.demarche ul { margin: 8px 0 12px; padding-left: 20px; color: var(--texte); }
+.demarche li { margin: 4px 0; }
+.demarche .lien { margin-top: 12px; }
+
+/* ---------- Visionneuse et messages ---------- */
 
 #visionneuse {
   position: fixed;
