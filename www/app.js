@@ -1,4 +1,4 @@
-// Tir Coach — V5
+// Tir Coach — V16
 // Carnet de tir (séances multi-armes, note, tirs contrôlés), râtelier, munitions (calibres),
 // stands & ouvertures, tirs de contrôle, licence & certificat (rappels), démarches, apprendre
 
@@ -16,7 +16,8 @@ const CLES = {
   papiers: 'tircoach-papiers',
   accord: 'tircoach-accord',
   avis: 'tircoach-avis',
-  scores: 'tircoach-scores'
+  scores: 'tircoach-scores',
+  notes: 'tircoach-notes'
 };
 
 // =====================================================================
@@ -48,17 +49,35 @@ const CONTROLES_INFO = {
   'taa-eauze': 'Saison 2026/2027. Sauf changement en raison de manifestations hippiques.'
 };
 
+// Calibres (les anciens identifiants restent valables)
 const CALIBRES = [
-  { id: 'plomb45', nom: '4,5 mm (.177)' },
-  { id: '22lr', nom: '22 LR' },
-  { id: '9mm', nom: '9 mm (9×19)' },
-  { id: '38sp', nom: '.38 Special / .357 Magnum' },
-  { id: '45acp', nom: '.45 ACP' },
-  { id: '223', nom: '.223 Rem / 5,56×45' },
-  { id: '308', nom: '.308 Win / 7,62×51' },
-  { id: 'cal12', nom: 'Calibre 12' },
-  { id: 'autre', nom: 'Autre calibre' }
-];
+  ['Air comprimé', 'plomb45', '4,5 mm (.177)'], ['Air comprimé', 'plomb55', '5,5 mm (.22)'],
+  ['Petits calibres', '22lr', '22 LR'], ['Petits calibres', '22short', '.22 Short'], ['Petits calibres', '22wmr', '.22 WMR (22 Magnum)'],
+  ['Petits calibres', '17hmr', '.17 HMR'],
+  ['Armes de poing', '635', '6,35 mm (.25 ACP)'], ['Armes de poing', '765', '7,65 mm Browning (.32 ACP)'],
+  ['Armes de poing', '32sw', '.32 S&W Long'], ['Armes de poing', '380', '9 mm Court (.380 ACP)'],
+  ['Armes de poing', '9mak', '9×18 Makarov'], ['Armes de poing', '9mm', '9 mm (9×19)'], ['Armes de poing', '921', '9×21 IMI'],
+  ['Armes de poing', '357sig', '.357 SIG'], ['Armes de poing', '38sp', '.38 Special'], ['Armes de poing', '357mag', '.357 Magnum'],
+  ['Armes de poing', '40sw', '.40 S&W'], ['Armes de poing', '10mm', '10 mm Auto'], ['Armes de poing', '44sp', '.44 Special'],
+  ['Armes de poing', '44mag', '.44 Magnum'], ['Armes de poing', '45acp', '.45 ACP'], ['Armes de poing', '45colt', '.45 Colt'],
+  ['Armes de poing', '454', '.454 Casull'], ['Armes de poing', '500sw', '.500 S&W Magnum'],
+  ['Armes de poing', '762tok', '7,62×25 Tokarev'], ['Armes de poing', '57', '5,7×28'],
+  ['Armes d\'épaule', '30car', '.30 Carbine'], ['Armes d\'épaule', '222', '.222 Remington'], ['Armes d\'épaule', '223', '.223 Rem / 5,56×45'],
+  ['Armes d\'épaule', '22250', '.22-250 Remington'], ['Armes d\'épaule', '243', '.243 Winchester'], ['Armes d\'épaule', '6br', '6 mm BR'],
+  ['Armes d\'épaule', '65cm', '6,5 Creedmoor'], ['Armes d\'épaule', '6555', '6,5×55 Suédois'], ['Armes d\'épaule', '65prc', '6,5 PRC'],
+  ['Armes d\'épaule', '270', '.270 Winchester'], ['Armes d\'épaule', '708', '7 mm-08 Remington'], ['Armes d\'épaule', '757', '7×57 Mauser'],
+  ['Armes d\'épaule', '764', '7×64'], ['Armes d\'épaule', '7rm', '7 mm Remington Magnum'], ['Armes d\'épaule', '300blk', '.300 Blackout'],
+  ['Armes d\'épaule', '76239', '7,62×39'], ['Armes d\'épaule', '308', '.308 Win / 7,62×51'], ['Armes d\'épaule', '3006', '.30-06 Springfield'],
+  ['Armes d\'épaule', '76254', '7,62×54R'], ['Armes d\'épaule', '303', '.303 British'], ['Armes d\'épaule', '300wm', '.300 Winchester Magnum'],
+  ['Armes d\'épaule', '300wsm', '.300 WSM'], ['Armes d\'épaule', '300prc', '.300 PRC'], ['Armes d\'épaule', '857', '8×57 IS'],
+  ['Armes d\'épaule', '9362', '9,3×62'], ['Armes d\'épaule', '9374', '9,3×74R'], ['Armes d\'épaule', '338lm', '.338 Lapua Magnum'],
+  ['Armes d\'épaule', '4570', '.45-70 Government'], ['Armes d\'épaule', '50bmg', '.50 BMG (12,7×99)'],
+  ['Fusils', 'cal12', 'Calibre 12'], ['Fusils', 'cal16', 'Calibre 16'], ['Fusils', 'cal20', 'Calibre 20'], ['Fusils', '410', '.410 (calibre 36)'],
+  ['Poudre noire', 'pn36', '.36 poudre noire'], ['Poudre noire', 'pn44', '.44 poudre noire'], ['Poudre noire', 'pn45', '.45 poudre noire'],
+  ['Poudre noire', 'pn58', '.58 poudre noire']
+].map(([g, id, nom]) => ({ g, id, nom }));
+const TYPES_ACCESSOIRES = ['Red dot', 'Lunette', 'Détente allégée (connecteur)', 'Silencieux / modérateur', 'Lampe', 'Laser', 'Bipied', 'Poignée', 'Chargeur grande capacité'];
+const CIBLES = ['C50', 'C200', 'TAR'];
 const CATEGORIES_PAPIERS = [
   { id: 'armes', nom: 'Papiers des armes', mois: [2, 1] },
   { id: 'autorisation', nom: 'Autorisation de détention (préfecture)', mois: [7, 6, 5, 4, 3, 2, 1] },
@@ -82,7 +101,6 @@ const SITE_APPLI = 'https://royvanmil.fr/tir-coach/';
 const LIEN_PARTAGE = SUR_PLAY_STORE ? PLAY_STORE : SITE_APPLI;
 const LIEN_AVIS = SUR_PLAY_STORE ? PLAY_STORE : 'https://royvanmil.fr/tir-coach/avis.html';
 
-const imageCalibre = (id) => (id && id !== 'autre' ? `images/calibres/${id}.svg` : '');
 
 // Contenu de l'espace Apprendre (repris du site du T.A.A.)
 const APPRENDRE = [
@@ -117,6 +135,36 @@ const APPRENDRE = [
     ['Clic', 'Un cran de tourelle : souvent ¼ MOA (≈ 0,7 cm) ou 0,1 MRAD (1 cm) à 100 m.'],
     ['Zéro', 'Régler la lunette pour que le point visé soit le point touché à une distance choisie.']
   ] },
+  { titre: '📐 MOA, MRAD et clics', termes: [
+    ['Le principe', "MOA et MRAD sont des angles. Plus la cible est loin, plus un même angle fait de centimètres sur la cible."],
+    ['1 MOA', "≈ 2,9 cm à 100 m. Donc ≈ 1,45 cm à 50 m, et ≈ 5,8 cm à 200 m."],
+    ['1 MRAD', "= 10 cm à 100 m. Donc 5 cm à 50 m, et 20 cm à 200 m."],
+    ['Un clic', "C'est écrit sur la tourelle : souvent ¼ MOA ou 0,1 MRAD par clic. Une lunette en MRAD avec un réticule en MRAD, c'est le plus simple."],
+    ['La méthode', "1. Tire un groupement de 3 à 5 coups. 2. Mesure l'écart entre le centre du groupe et le centre de la cible, en hauteur et sur le côté. 3. Divise par la valeur d'un clic à cette distance. 4. Tourne la tourelle dans le sens indiqué (UP = la balle monte, R = la balle va à droite)."],
+    ['Exemple', "À 100 m, groupe 5 cm trop bas, clics de ¼ MOA (0,73 cm) : 5 ÷ 0,73 ≈ 7 clics vers le haut (UP)."]
+  ], html: `
+    <table class="tableauClics">
+      <tr><th>1 clic =</th><th>50 m</th><th>100 m</th><th>200 m</th></tr>
+      <tr><td>⅛ MOA</td><td>0,18 cm</td><td>0,36 cm</td><td>0,73 cm</td></tr>
+      <tr><td>¼ MOA</td><td>0,36 cm</td><td>0,73 cm</td><td>1,45 cm</td></tr>
+      <tr><td>½ MOA</td><td>0,73 cm</td><td>1,45 cm</td><td>2,9 cm</td></tr>
+      <tr><td>1 MOA</td><td>1,45 cm</td><td>2,9 cm</td><td>5,8 cm</td></tr>
+      <tr><td>0,05 MRAD</td><td>0,25 cm</td><td>0,5 cm</td><td>1 cm</td></tr>
+      <tr><td>0,1 MRAD</td><td>0,5 cm</td><td>1 cm</td><td>2 cm</td></tr>
+      <tr><td>1 MRAD</td><td>5 cm</td><td>10 cm</td><td>20 cm</td></tr>
+    </table>
+    <div class="calcClics">
+      <b>Calcule tes clics</b>
+      <label>Distance (m)<input type="number" id="ccDistance" inputmode="numeric" value="100"></label>
+      <label>Écart mesuré sur la cible (cm)<input type="number" id="ccEcart" inputmode="decimal" placeholder="ex. 5"></label>
+      <label>Valeur d'un clic
+        <select id="ccClic">
+          <option value="0.25">¼ MOA</option><option value="0.125">⅛ MOA</option><option value="0.5">½ MOA</option>
+          <option value="m0.1">0,1 MRAD</option><option value="m0.05">0,05 MRAD</option>
+        </select>
+      </label>
+      <div id="ccResultat" class="resultat"></div>
+    </div>` },
   { titre: '🔴 Les red dot', termes: [
     ['Red dot', 'Viseur sans grossissement qui montre un point lumineux, on vise les deux yeux ouverts.', 'reddot'],
     ['Taille du point', 'Donnée en MOA : un point de 2 MOA couvre environ 6 cm à 100 m.'],
@@ -174,6 +222,7 @@ let munitions = charger(CLES.munitions, []);
 let standsPerso = charger(CLES.stands, []);
 let controles = charger(CLES.controles, []).filter((c) => !String(c.id).startsWith('base-'));
 let papiers = charger(CLES.papiers, []);
+let notesBloc = charger(CLES.notes, []);
 let licence = Object.assign({ numero: '', fin: '', image: '', certificatFin: '', certificatImage: '' }, charger(CLES.licence, {}));
 
 let seanceActive = null;
@@ -182,6 +231,8 @@ let armeActive = null;
 let standActif = null;
 let papierActif = null;
 let papierEnModification = false;
+let noteActive = null;
+let notesVisibles = new Set();
 let enModification = false;
 let tirEnModification = false;
 let armeEnModification = false;
@@ -214,7 +265,7 @@ function migrerSeances(liste) {
 }
 
 function donneesCompletes() {
-  return { appli: 'Tir Coach', version: 6, date: new Date().toISOString(), seances, armes, munitions, standsPerso, controles, licence, papiers };
+  return { appli: 'Tir Coach', version: 16, date: new Date().toISOString(), seances, armes, munitions, standsPerso, controles, licence, papiers, notes: notesBloc };
 }
 
 async function sauver() {
@@ -226,6 +277,7 @@ async function sauver() {
     localStorage.setItem(CLES.controles, JSON.stringify(controles));
     localStorage.setItem(CLES.licence, JSON.stringify(licence));
     localStorage.setItem(CLES.papiers, JSON.stringify(papiers));
+    localStorage.setItem(CLES.notes, JSON.stringify(notesBloc));
   } catch (e) {}
   if (natif) {
     try {
@@ -294,6 +346,35 @@ function remplirListe(idListe, valeurs) {
   $(idListe).innerHTML = uniques.map((v) => `<option value="${html(v)}">`).join('');
 }
 
+// Liste déroulante avec « Autre… » : la case texte s'ouvre et c'est ce texte qui est gardé
+function normal(t) { return (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+function remplirSelectAutre(sel, inp, options, valeur, vide) {
+  // options : [{ id, nom, g? }]
+  const groupes = [];
+  options.forEach((o) => { const g = o.g || ''; let x = groupes.find((y) => y.g === g); if (!x) { x = { g, liste: [] }; groupes.push(x); } x.liste.push(o); });
+  $(sel).innerHTML = (vide ? `<option value="">${html(vide)}</option>` : '') +
+    groupes.map((x) => {
+      const opts = x.liste.map((o) => `<option value="${html(o.id)}">${html(o.nom)}</option>`).join('');
+      return x.g ? `<optgroup label="${html(x.g)}">${opts}</optgroup>` : opts;
+    }).join('') + '<option value="autre">Autre… (à écrire)</option>';
+  let v = valeur || '';
+  if (v && v !== 'autre' && !options.some((o) => o.id === v)) {
+    const nv = normal(v);
+    const egal = options.find((o) => normal(o.nom) === nv || normal(o.id) === nv);
+    const debut = nv.length >= 2 ? options.filter((o) => normal(o.nom).startsWith(nv)) : [];
+    const trouve = egal || (debut.length === 1 ? debut[0] : null);
+    if (trouve) v = trouve.id;
+  }
+  if (v && v !== 'autre' && !options.some((o) => o.id === v)) { $(sel).value = 'autre'; $(inp).value = valeur; }
+  else { $(sel).value = v; $(inp).value = ''; }
+  $(inp).classList.toggle('cache', $(sel).value !== 'autre');
+  $(sel).onchange = () => { $(inp).classList.toggle('cache', $(sel).value !== 'autre'); if ($(sel).value === 'autre') $(inp).focus(); if ($(sel).onchangeSuite) $(sel).onchangeSuite(); };
+}
+function lireSelectAutre(sel, inp) {
+  return $(sel).value === 'autre' ? $(inp).value.trim() : $(sel).value;
+}
+function remplirCalibres(sel, inp, valeur) { remplirSelectAutre(sel, inp, CALIBRES, valeur, 'Calibre…'); }
+
 function envoyerMail(sujet, corps) {
   window.location.href = `mailto:${EMAIL_PROPOSITIONS}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
 }
@@ -302,6 +383,7 @@ function envoyerMail(sujet, corps) {
 
 async function afficherImage(img, nom) {
   if (!natif || !nom) return;
+  if (/\.pdf$/i.test(nom)) nom = nom.replace(/\.pdf$/i, '.jpg');
   const chemin = DOSSIER + '/' + nom;
   img.onerror = async () => {
     img.onerror = null;
@@ -365,8 +447,90 @@ function sansNatif() {
 function voirPhoto(nom) {
   $('nomGrand').textContent = nom.split('/').pop();
   $('imageGrande').removeAttribute('src');
-  afficherImage($('imageGrande'), nom);
+  $('visionneuse').classList.remove('tourne', 'avecPdf');
+  $('pagesPdf').classList.add('cache');
+  $('pagesPdf').innerHTML = '';
+  $('imageGrande').classList.remove('cache');
   $('visionneuse').classList.remove('cache');
+  if (/\.pdf$/i.test(nom)) { voirPdf(nom); return; }
+  afficherImage($('imageGrande'), nom);
+}
+
+// ---------- PDF (affichage avec pdf.js, inclus dans l'appli) ----------
+let pdfjs = null;
+async function chargerPdfjs() {
+  if (!pdfjs) {
+    pdfjs = await import('./lib/pdf.min.mjs');
+    pdfjs.GlobalWorkerOptions.workerSrc = 'lib/pdf.worker.min.mjs';
+  }
+  return pdfjs;
+}
+function base64EnOctets(b64) {
+  const bin = atob(b64); const o = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) o[i] = bin.charCodeAt(i);
+  return o;
+}
+async function pagesPdf(b64, max, largeur) {
+  const lib = await chargerPdfjs();
+  const doc = await lib.getDocument({ data: base64EnOctets(b64) }).promise;
+  const toiles = [];
+  for (let n = 1; n <= Math.min(doc.numPages, max); n++) {
+    const page = await doc.getPage(n);
+    const v1 = page.getViewport({ scale: 1 });
+    const vue = page.getViewport({ scale: largeur / v1.width });
+    const c = document.createElement('canvas');
+    c.width = Math.round(vue.width); c.height = Math.round(vue.height);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vue }).promise;
+    toiles.push(c);
+  }
+  return toiles;
+}
+async function voirPdf(nom) {
+  $('imageGrande').classList.add('cache');
+  $('visionneuse').classList.add('avecPdf');
+  $('pagesPdf').classList.remove('cache');
+  $('pagesPdf').innerHTML = '<p>Ouverture du PDF…</p>';
+  try {
+    const r = await P.Filesystem.readFile({ path: DOSSIER + '/' + nom, directory: 'DOCUMENTS' });
+    const toiles = await pagesPdf(r.data, 30, 1400);
+    $('pagesPdf').innerHTML = '';
+    toiles.forEach((c) => $('pagesPdf').appendChild(c));
+  } catch (e) { $('pagesPdf').innerHTML = '<p>Impossible d\'ouvrir ce PDF.</p>'; }
+}
+
+// Choisir une image ou un PDF dans les fichiers du téléphone. Renvoie le nom enregistré (ou '').
+function choisirFichier() {
+  return new Promise((ok) => {
+    const inp = $('choixFichier');
+    inp.value = '';
+    inp.onchange = () => ok(inp.files[0] || null);
+    inp.click();
+  });
+}
+function lireEnBase64(fichier) {
+  return new Promise((ok, ko) => {
+    const l = new FileReader();
+    l.onload = () => ok(String(l.result).split(',')[1]);
+    l.onerror = ko;
+    l.readAsDataURL(fichier);
+  });
+}
+async function enregistrerFichier(fichier, cheminSansExt) {
+  const estPdf = fichier.type === 'application/pdf' || /\.pdf$/i.test(fichier.name);
+  const data = await lireEnBase64(fichier);
+  const ecrire = (chemin, d) => P.Filesystem.writeFile({ path: DOSSIER + '/' + chemin, data: d, directory: 'DOCUMENTS', recursive: true });
+  if (estPdf) {
+    await ecrire(cheminSansExt + '.pdf', data);
+    try {
+      const [c] = await pagesPdf(data, 1, 1000);
+      await ecrire(cheminSansExt + '.jpg', c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+    } catch (e) {}
+    return cheminSansExt + '.pdf';
+  }
+  await ecrire(cheminSansExt + '.jpg', data);
+  return cheminSansExt + '.jpg';
 }
 
 // Vignette avec bouton de retrait (la photo reste dans le dossier du téléphone)
@@ -469,10 +633,10 @@ async function programmerRappels() {
 // =====================================================================
 
 const ECRANS = ['Menu', 'Carnet', 'Form', 'Seance', 'TirForm', 'Ratelier', 'ArmeForm', 'Arme',
-  'Munitions', 'Stands', 'Stand', 'StandForm', 'Controles', 'Licence', 'Demarches', 'Apprendre', 'Infos', 'Papiers', 'PapierForm', 'Papier', 'Jeu'];
+  'Munitions', 'Stands', 'Stand', 'StandForm', 'Controles', 'Licence', 'Demarches', 'Apprendre', 'Infos', 'Papiers', 'PapierForm', 'Papier', 'Jeu', 'Notes', 'NoteForm'];
 const TITRES = {
   menu: 'Tir Coach', carnet: 'Carnet de tir', seance: 'Séance', ratelier: 'Mon râtelier', arme: 'Arme',
-  munitions: 'Munitions', stands: 'Stands & ouvertures', stand: 'Stand', controles: 'Tirs de contrôle',
+  munitions: 'Munitions', stands: 'Stands & ouvertures', stand: 'Stand', controles: 'Dates tirs de contrôle', notes: 'Bloc-notes',
   licence: 'Licence & certificat', demarches: 'Démarches', apprendre: 'Apprendre', infos: 'À propos', papiers: 'Mes papiers', papier: 'Papier', jeu: 'Jeu de précision'
 };
 
@@ -486,7 +650,8 @@ function montrer(nom) {
     tirform: tirEnModification ? "Modifier l'arme tirée" : 'Arme tirée',
     armeform: armeEnModification ? "Modifier l'arme" : 'Nouvelle arme',
     standform: standEnModification ? 'Modifier le stand' : 'Nouveau stand',
-    papierform: papierEnModification ? 'Modifier le papier' : 'Nouveau papier'
+    papierform: papierEnModification ? 'Modifier le papier' : 'Nouveau papier',
+    noteform: noteActive ? 'Modifier la note' : 'Nouvelle note'
   };
   $('titre').textContent = titres[nom] || TITRES[nom] || 'Tir Coach';
   if (nom === 'menu') afficherAlertes();
@@ -501,7 +666,8 @@ function retour() {
     case 'menu': montrer('accueil'); return true;
     case 'infos': montrer(depuisMenu ? 'menu' : 'accueil'); return true;
     case 'carnet': case 'ratelier': case 'munitions': case 'stands':
-    case 'controles': case 'licence': case 'demarches': case 'apprendre': case 'papiers': case 'jeu': montrer('menu'); return true;
+    case 'controles': case 'licence': case 'demarches': case 'apprendre': case 'papiers': case 'jeu': case 'notes': montrer('menu'); return true;
+    case 'noteform': afficherNotes(); return true;
     case 'papier': afficherPapiers(); return true;
     case 'papierform':
       if (papierEnModification && papierActif) ouvrirPapier(papierActif.id); else afficherPapiers();
@@ -529,29 +695,37 @@ function retour() {
 
 function coupsSeance(s) { return s.tirs.reduce((t, x) => t + (parseInt(x.coups, 10) || 0), 0); }
 
-// Tirs contrôlés valables sur les 12 derniers mois, espacés d'au moins 2 mois
-function bilanControles() {
-  const limite = decalerMois(aujourdhui(), -12);
-  const dates = seances.filter((s) => s.controle && s.date > limite && s.date <= aujourdhui()).map((s) => s.date).sort();
+// Tirs d'assiduité : chaque séance au stand compte ; 3 séances sur la saison (1er sept → 31 août), espacées d'au moins 2 mois
+function saisonCourante() {
+  const a = aujourdhui(); const an = parseInt(a.slice(0, 4), 10); const mois = parseInt(a.slice(5, 7), 10);
+  const debut = mois >= 9 ? an : an - 1;
+  return { debut: `${debut}-09-01`, fin: `${debut + 1}-08-31`, nom: `${debut}-${debut + 1}` };
+}
+function bilanAssiduite() {
+  const sa = saisonCourante();
+  const dates = [...new Set(seances.map((s) => s.date).filter((d) => d >= sa.debut && d <= sa.fin && d <= aujourdhui()))].sort();
   const valables = [];
   dates.forEach((d) => { if (!valables.length || d >= decalerMois(valables[valables.length - 1], 2)) valables.push(d); });
-  return valables;
+  return { saison: sa, valables };
 }
 
 function afficherCompteur() {
-  const valables = bilanControles();
+  const { saison, valables } = bilanAssiduite();
   const n = Math.min(valables.length, 3);
   const prochain = valables.length ? decalerMois(valables[valables.length - 1], 2) : '';
+  $('compteurControles').className = 'carte assiduite';
   $('compteurControles').innerHTML = `
     <div class="ligneListe">
       <div class="milieu">
-        <div class="haut">Tirs contrôlés (12 derniers mois)</div>
-        ${prochain && n < 3 ? `<div class="bas">Le prochain compte à partir du ${dateFr(prochain)}</div>` : ''}
-        ${n >= 3 ? '<div class="bas">3 tirs contrôlés valables ✓</div>' : ''}
+        <div class="haut">Tirs d'assiduité — saison ${saison.nom}</div>
+        ${n >= 3 ? '<div class="bas">3 séances valables ✓</div>'
+          : prochain ? `<div class="bas">La prochaine séance compte à partir du ${dateFr(prochain)}</div>`
+          : '<div class="bas">Aucune séance cette saison pour le moment</div>'}
+        ${valables.length ? `<div class="datesComptees">Comptées : ${valables.slice(0, 3).map(dateFr).join(' · ')}</div>` : ''}
       </div>
       <div class="compteur">${n}/3</div>
     </div>
-    <p class="regle">Règle : 1re demande d'arme de catégorie B → 3 tirs contrôlés sur les 12 mois avant la demande, espacés d'au moins 2 mois. Renouvellement → au moins 1 tir par an.</p>`;
+    <p class="regle">Chaque passage au stand compte (cahier de présence ou badgeuse). Il faut 3 séances sur la saison sportive (1er septembre → 31 août), espacées d'au moins 2 mois. Vérifie le règlement de ton club.</p>`;
 }
 
 function afficherCarnet() {
@@ -567,7 +741,7 @@ function afficherCarnet() {
     div.className = 'carte ligneListe';
     div.innerHTML = `
       <div class="milieu">
-        <div class="haut">${dateFr(s.date)}${s.lieu ? ' — ' + html(s.lieu) : ''}${s.controle ? '<span class="badge">contrôlé</span>' : ''}</div>
+        <div class="haut">${dateFr(s.date)}${s.lieu ? ' — ' + html(s.lieu) : ''}</div>
         <div class="bas">${html(nomsArmes || 'Aucune arme notée')}</div>
         <div class="bas">${coups ? pluriel(coups, 'coup') + ' · ' : ''}${nbPhotos} &#128247;</div>
       </div>
@@ -595,11 +769,10 @@ function ouvrirFormulaire(modifier) {
   remplirListe('listeLieux', [...tousLesStands().map((s) => s.nom), ...seances.map((s) => s.lieu)]);
   const der = seances[seances.length - 1] || {};
   const s = modifier && seanceActive ? seanceActive
-    : { date: aujourdhui(), lieu: der.lieu || '', note: 0, notes: '', controle: false };
+    : { date: aujourdhui(), lieu: der.lieu || '', note: 0, notes: '' };
   $('champDate').value = s.date;
   $('champLieu').value = s.lieu;
   $('champNotes').value = s.notes;
-  $('champControle').checked = !!s.controle;
   noteChoisie = s.note || 0;
   dessinerNotes();
   montrer('form');
@@ -610,7 +783,6 @@ async function enregistrerSeance() {
     date: $('champDate').value || aujourdhui(),
     lieu: $('champLieu').value.trim(),
     note: noteChoisie,
-    controle: $('champControle').checked,
     notes: $('champNotes').value.trim()
   };
   const nouvelle = !(enModification && seanceActive);
@@ -634,7 +806,7 @@ function ouvrirSeance(id) {
   $('resumeSeance').innerHTML = `
     <div class="ligneListe">
       <div class="milieu">
-        <div class="haut">${dateFr(s.date)}${s.controle ? '<span class="badge">tir contrôlé</span>' : ''}</div>
+        <div class="haut">${dateFr(s.date)}</div>
         ${s.lieu ? `<div class="bas">${html(s.lieu)}</div>` : ''}
         <div class="bas">${pluriel(s.tirs.length, 'arme')}${coups ? ' · ' + pluriel(coups, 'coup') + ' tirés' : ''}</div>
       </div>
@@ -650,7 +822,7 @@ function ouvrirSeance(id) {
 function carteTir(t) {
   const notes = t.photos.map((p) => parseFloat(p.score)).filter((n) => !isNaN(n));
   const total = notes.reduce((a, b) => a + b, 0);
-  const infos = [t.munition, [t.distance ? t.distance + ' m' : '', t.cible].filter(Boolean).join(' · ')].filter(Boolean);
+  const infos = [[t.calibre ? nomCalibre(t.calibre) : '', t.munition].filter(Boolean).join(' · '), [t.distance ? t.distance + ' m' : '', t.cible].filter(Boolean).join(' · ')].filter(Boolean);
   const div = document.createElement('div');
   div.className = 'carte tir';
   div.innerHTML = `
@@ -686,7 +858,7 @@ function carteTir(t) {
 function ouvrirFormulaireTir(modifier) {
   tirEnModification = modifier;
   const tousTirs = seances.flatMap((s) => s.tirs);
-  remplirListe('listeArmes', [...armes.map((a) => a.nom), ...tousTirs.map((t) => t.arme)]);
+  remplirListe('listeArmes', tousTirs.filter((t) => !t.armeId).map((t) => t.arme));
   remplirListe('listeMunitions', [...munitions.map((m) => m.nom), ...tousTirs.map((t) => t.munition)]);
   let t;
   if (modifier && tirActif) {
@@ -694,33 +866,75 @@ function ouvrirFormulaireTir(modifier) {
   } else {
     tirActif = null;
     const der = tousTirs[tousTirs.length - 1] || {};
-    t = { arme: '', munition: '', coups: '', distance: der.distance || 25, cible: der.cible || 'C50' };
+    t = { arme: '', calibre: '', munition: '', coups: '', distance: der.distance || 25, cible: der.cible || 'C50' };
   }
-  $('tirArme').value = t.arme;
+  // Arme : liste du râtelier (chaque arme est unique), ou « Autre » à écrire
+  const lie = t.armeId ? armes.find((a) => a.id === t.armeId) : (t.arme ? trouverArme(t.arme) : null);
+  $('tirArmeChoix').innerHTML = '<option value="">Choisis l\'arme…</option>' +
+    [...armes].sort((a, b) => nomArme(a).localeCompare(nomArme(b))).map((a) => `<option value="${a.id}">${html(nomArme(a))}</option>`).join('') +
+    '<option value="autre">Autre… (pas dans mon râtelier)</option>';
+  $('tirArmeChoix').value = lie ? String(lie.id) : (t.arme || !armes.length ? 'autre' : '');
+  $('tirArme').value = lie ? '' : t.arme;
+  $('tirArme').classList.toggle('cache', $('tirArmeChoix').value !== 'autre');
+  remplirCalibres('tirCalibre', 'tirCalibreAutre', t.calibre || '');
   $('tirMunition').value = t.munition;
   $('tirCoups').value = t.coups;
   $('tirDistance').value = t.distance;
-  $('tirCible').value = t.cible;
+  remplirSelectAutre('tirCible', 'tirCibleAutre', CIBLES.map((c) => ({ id: c, nom: c })), t.cible || 'C50');
   $('btnSupprimerTir').classList.toggle('cache', !modifier);
+  $('zoneStock').classList.toggle('cache', modifier || !munitions.length);
+  remplirStockTir();
   montrer('tirform');
 }
 
-$('tirArme').addEventListener('change', () => {
-  if ($('tirMunition').value) return;
-  const tirs = seances.flatMap((s) => s.tirs).filter((t) => memeTexte(t.arme, $('tirArme').value));
-  const der = tirs[tirs.length - 1];
-  if (der) $('tirMunition').value = der.munition;
-});
+function armeDuFormulaire() {
+  const v = $('tirArmeChoix').value;
+  return v && v !== 'autre' ? armes.find((a) => String(a.id) === v) || null : null;
+}
+// Liste « Déduire du stock » : les munitions du même calibre d'abord
+function remplirStockTir() {
+  const cal = lireSelectAutre('tirCalibre', 'tirCalibreAutre');
+  const mun = $('tirMunition').value;
+  const tri = [...munitions].sort((a, b) => ((b.calibre === cal) - (a.calibre === cal)) || a.nom.localeCompare(b.nom));
+  $('tirStock').innerHTML = '<option value="">— Ne pas déduire —</option>' +
+    tri.map((m) => `<option value="${m.id}">${html(m.nom)}${m.calibre ? ' — ' + html(nomCalibre(m.calibre)) : ''} (${parseInt(m.quantite, 10) || 0})</option>`).join('');
+  const parNom = munitions.find((m) => memeTexte(m.nom, mun));
+  const memeCal = cal ? munitions.filter((m) => m.calibre === cal) : [];
+  const choix = parNom || (memeCal.length === 1 ? memeCal[0] : null);
+  $('tirStock').value = choix ? String(choix.id) : '';
+}
+function quandArmeChange() {
+  const a = armeDuFormulaire();
+  $('tirArme').classList.toggle('cache', $('tirArmeChoix').value !== 'autre');
+  if ($('tirArmeChoix').value === 'autre') $('tirArme').focus();
+  if (a && a.calibre) remplirCalibres('tirCalibre', 'tirCalibreAutre', a.calibre);
+  if (!$('tirMunition').value) {
+    const tirs = seances.flatMap((s) => s.tirs).filter((t) => (a ? tirDeLArme(t, a) : memeTexte(t.arme, $('tirArme').value)));
+    const der = tirs[tirs.length - 1];
+    if (der) $('tirMunition').value = der.munition;
+  }
+  remplirStockTir();
+}
+$('tirArmeChoix').addEventListener('change', quandArmeChange);
+$('tirArme').addEventListener('change', quandArmeChange);
+$('tirCalibre').onchangeSuite = remplirStockTir;
+$('tirMunition').addEventListener('change', remplirStockTir);
+
 
 async function enregistrerTir() {
   const valeurs = {
-    arme: $('tirArme').value.trim(),
+    arme: armeDuFormulaire() ? nomArme(armeDuFormulaire()) : $('tirArme').value.trim(),
+    calibre: lireSelectAutre('tirCalibre', 'tirCalibreAutre'),
     munition: $('tirMunition').value.trim(),
     coups: $('tirCoups').value,
     distance: $('tirDistance').value,
-    cible: $('tirCible').value
+    cible: lireSelectAutre('tirCible', 'tirCibleAutre')
   };
   if (!valeurs.arme) { message("Indique l'arme."); return; }
+  const armeLiee = armeDuFormulaire() || trouverArme(valeurs.arme);
+  valeurs.armeId = armeLiee ? armeLiee.id : null;
+  const stock = munitions.find((m) => String(m.id) === $('tirStock').value);
+  if (stock && !valeurs.munition) valeurs.munition = stock.nom;
   const nouveau = !(tirEnModification && tirActif);
   if (nouveau) {
     tirActif = Object.assign({ id: Date.now(), photos: [] }, valeurs);
@@ -729,9 +943,9 @@ async function enregistrerTir() {
     Object.assign(tirActif, valeurs);
   }
   const coups = parseInt(valeurs.coups, 10);
-  const stock = munitions.find((m) => memeTexte(m.nom, valeurs.munition));
   if (nouveau && coups > 0 && stock) {
-    if (confirm(`Retirer ${coups} cartouches de « ${stock.nom} » du stock ?\nStock actuel : ${stock.quantite}`)) {
+    const nomStock = stock.nom + (stock.calibre ? ' — ' + nomCalibre(stock.calibre) : '');
+    if (confirm(`Voulez-vous déduire ${coups} cartouches de votre stock « ${nomStock} » ?\nStock actuel : ${parseInt(stock.quantite, 10) || 0}`)) {
       stock.quantite = Math.max(0, (parseInt(stock.quantite, 10) || 0) - coups);
     }
   }
@@ -778,25 +992,44 @@ async function supprimerSeance() {
 // Râtelier
 // =====================================================================
 
-function tirsDeLArme(nom) { return seances.flatMap((s) => s.tirs).filter((t) => memeTexte(t.arme, nom)); }
+// Retrouve une arme du râtelier à partir du nom écrit dans une séance
+function trouverArme(nom) {
+  if (!nom) return null;
+  const exactes = armes.filter((a) => memeTexte(nomArme(a), nom) || memeTexte(a.nom, nom));
+  if (exactes.length === 1) return exactes[0];
+  if (exactes.length > 1) return exactes.find((a) => memeTexte(nomArme(a), nom)) || null;
+  const n = normal(nom);
+  if (n.length < 3) return null;
+  const proches = armes.filter((a) => { const m = normal(a.nom); return m && (m.includes(n) || n.includes(m)); });
+  if (proches.length > 1) { const p2 = proches.filter((a) => normal(nomArme(a)) === n); return p2.length === 1 ? p2[0] : null; }
+  return proches.length === 1 ? proches[0] : null;
+}
+function nomArme(a) { return a ? a.nom + (a.distinctif ? ' — ' + a.distinctif : '') : ''; }
+function tirDeLArme(t, a) { return t.armeId ? t.armeId === a.id : trouverArme(t.arme) === a; }
+function tirsDeLArme(a) { return seances.flatMap((s) => s.tirs).filter((t) => tirDeLArme(t, a)); }
+function seancesDeLArme(a) { return seances.filter((s) => s.tirs.some((t) => tirDeLArme(t, a))); }
+function lierTirsAuxArmes() {
+  seances.forEach((s) => s.tirs.forEach((t) => { if (!t.armeId) { const a = trouverArme(t.arme); if (a) t.armeId = a.id; } }));
+}
 
 function afficherRatelier() {
   const zone = $('listeArmesRatelier');
   zone.innerHTML = '';
   if (!armes.length) zone.innerHTML = '<div class="vide">Ton râtelier est vide.</div>';
-  [...armes].sort((a, b) => a.nom.localeCompare(b.nom)).forEach((a) => {
-    const infos = [a.categorie ? 'Cat. ' + a.categorie : '', a.calibre,
+  [...armes].sort((a, b) => nomArme(a).localeCompare(nomArme(b))).forEach((a) => {
+    const infos = [a.categorie ? 'Cat. ' + a.categorie : '', nomCalibre(a.calibre),
       a.chargeurs ? pluriel(parseInt(a.chargeurs, 10), 'chargeur') : ''].filter(Boolean).join(' · ');
-    const nb = tirsDeLArme(a.nom).length;
+    const nb = seancesDeLArme(a).length;
+    const coups = tirsDeLArme(a).reduce((t, x) => t + (parseInt(x.coups, 10) || 0), 0);
     const div = document.createElement('div');
     div.className = 'carte ligneListe';
     div.innerHTML = `
       <img class="miniature" alt="">
       <div class="milieu">
-        <div class="haut">${html(a.nom)}</div>
+        <div class="haut">${html(a.nom)}${a.distinctif ? ` <span class="badge">${html(a.distinctif)}</span>` : ''}</div>
         <div class="bas">${html(infos)}</div>
       </div>
-      <div class="droite"><div class="nb">${pluriel(nb, 'séance')}</div></div>`;
+      <div class="droite"><div class="nb">${pluriel(nb, 'séance')}</div>${coups ? `<div class="nb">${coups} coups</div>` : ''}</div>`;
     const img = div.querySelector('img');
     if (a.photos.length) afficherImage(img, a.photos[0]); else img.style.visibility = 'hidden';
     div.onclick = () => ouvrirArme(a.id);
@@ -807,10 +1040,11 @@ function afficherRatelier() {
 
 function ouvrirFormulaireArme(modifier) {
   armeEnModification = modifier;
-  const a = modifier && armeActive ? armeActive : { nom: '', categorie: '', calibre: '', chargeurs: '', notes: '' };
+  const a = modifier && armeActive ? armeActive : { nom: '', distinctif: '', categorie: '', calibre: '', chargeurs: '', notes: '' };
   $('armeNom').value = a.nom;
+  $('armeDistinctif').value = a.distinctif || '';
   $('armeCategorie').value = a.categorie;
-  $('armeCalibre').value = a.calibre;
+  remplirCalibres('armeCalibre', 'armeCalibreAutre', a.calibre);
   $('armeChargeurs').value = a.chargeurs;
   $('armeNotes').value = a.notes;
   $('armeRire').innerHTML = '<option value="">— choisir —</option>' +
@@ -822,8 +1056,9 @@ function ouvrirFormulaireArme(modifier) {
 async function enregistrerArme() {
   const valeurs = {
     nom: $('armeNom').value.trim(),
+    distinctif: $('armeDistinctif').value.trim(),
     categorie: $('armeCategorie').value,
-    calibre: $('armeCalibre').value.trim(),
+    calibre: lireSelectAutre('armeCalibre', 'armeCalibreAutre'),
     chargeurs: $('armeChargeurs').value,
     notes: $('armeNotes').value.trim()
   };
@@ -831,12 +1066,13 @@ async function enregistrerArme() {
   if (!valeurs.nom) { message("Indique le nom de l'arme."); return; }
   if (armeEnModification && armeActive) {
     const ancien = armeActive.nom;
-    if (ancien !== valeurs.nom) {
-      seances.forEach((s) => s.tirs.forEach((t) => { if (memeTexte(t.arme, ancien)) t.arme = valeurs.nom; }));
+    if (ancien !== valeurs.nom || (armeActive.distinctif || '') !== valeurs.distinctif) {
+      seances.forEach((s) => s.tirs.forEach((t) => { if (t.armeId === armeActive.id || (!t.armeId && memeTexte(t.arme, ancien))) t.armeId = armeActive.id; }));
     }
     Object.assign(armeActive, valeurs);
+    seances.forEach((s) => s.tirs.forEach((t) => { if (t.armeId === armeActive.id) t.arme = nomArme(armeActive); }));
   } else {
-    armeActive = Object.assign({ id: Date.now(), photos: [], modifs: [], entretiens: [] }, valeurs);
+    armeActive = Object.assign({ id: Date.now(), photos: [], modifs: [], entretiens: [], accessoires: [] }, valeurs);
     armes.push(armeActive);
   }
   await sauver();
@@ -848,16 +1084,19 @@ function ouvrirArme(id) {
   if (!armeActive) return afficherRatelier();
   armeEnModification = false;
   const a = armeActive;
-  const tirs = tirsDeLArme(a.nom);
+  if (!a.accessoires) a.accessoires = [];
+  const tirs = tirsDeLArme(a);
+  const nbSeances = seancesDeLArme(a).length;
   const coupsTotal = tirs.reduce((t, x) => t + (parseInt(x.coups, 10) || 0), 0);
   const lignes = [
     a.categorie ? 'Catégorie ' + a.categorie : '',
-    a.calibre ? 'Calibre ' + a.calibre : '',
+    a.calibre ? 'Calibre ' + nomCalibre(a.calibre) : '',
     a.chargeurs ? pluriel(parseInt(a.chargeurs, 10), 'chargeur') : '',
-    pluriel(tirs.length, 'séance') + (coupsTotal ? ` · ${coupsTotal} coups tirés` : '')
+    pluriel(nbSeances, 'séance') + (coupsTotal ? ` · ${coupsTotal} coups tirés` : ''),
+    a.accessoires.length ? a.accessoires.map((x) => x.type).join(' · ') : ''
   ].filter(Boolean);
   $('resumeArme').innerHTML = `
-    <div class="haut">${html(a.nom)}</div>
+    <div class="haut">${html(a.nom)}${a.distinctif ? ` <span class="badge">${html(a.distinctif)}</span>` : ''}</div>
     ${lignes.map((l) => `<div class="bas">${html(l)}</div>`).join('')}
     ${a.notes ? `<div class="notes">${html(a.notes)}</div>` : ''}`;
 
@@ -871,6 +1110,10 @@ function ouvrirArme(id) {
     }));
   });
 
+  afficherAccessoires();
+  remplirSelectAutre('accType', 'accTypeAutre', TYPES_ACCESSOIRES.map((t) => ({ id: t, nom: t })), '', 'Type d\'accessoire…');
+  $('accModele').value = '';
+  $('accNotes').value = '';
   afficherJournal('listeModifs', a.modifs, 'Aucune modification notée.');
   afficherJournal('listeEntretiens', a.entretiens, 'Aucun entretien noté.');
   $('modifDate').value = aujourdhui();
@@ -906,6 +1149,52 @@ async function ajouterJournal(type) {
   const texte = $(champTexte).value.trim();
   if (!texte) { message("Écris quelque chose avant d'ajouter."); return; }
   armeActive[type].push({ date: $(champDate).value || aujourdhui(), texte });
+  await sauver();
+  ouvrirArme(armeActive.id);
+}
+
+function afficherAccessoires() {
+  const a = armeActive;
+  const zone = $('listeAccessoires');
+  zone.innerHTML = a.accessoires.length ? '' : '<p class="aide">Aucun accessoire noté.</p>';
+  a.accessoires.forEach((x) => {
+    const div = document.createElement('div');
+    div.className = 'carte ligneListe accessoire';
+    div.innerHTML = `
+      ${x.photo ? '<img class="miniAcc" alt="">' : ''}
+      <div class="milieu">
+        <div class="haut">${html(x.type)}</div>
+        ${x.modele ? `<div class="bas">${html(x.modele)}</div>` : ''}
+        ${x.notes ? `<div class="bas">${html(x.notes)}</div>` : ''}
+        <div class="actionsAcc">
+          <button class="lienPetit btnP">&#128247; Photo</button>
+          <button class="lienPetit btnG">&#128444;&#65039; Galerie</button>
+          <button class="lienPetit btnS">Supprimer</button>
+        </div>
+      </div>`;
+    if (x.photo) { const img = div.querySelector('img'); afficherImage(img, x.photo); img.onclick = () => voirPhoto(x.photo); }
+    const photo = async (source) => {
+      if (sansNatif()) return;
+      try {
+        const nom = `Ratelier/${nettoyer(a.nom) || 'Arme'}_${nettoyer(x.type) || 'Accessoire'}_${Date.now()}.jpg`;
+        if (!(await obtenirImage(source, nom))) return;
+        x.photo = nom; await sauver(); ouvrirArme(a.id);
+      } catch (e) { erreurPhoto(e); }
+    };
+    div.querySelector('.btnP').onclick = () => photo('photo');
+    div.querySelector('.btnG').onclick = () => photo('galerie');
+    div.querySelector('.btnS').onclick = async () => {
+      if (!confirm(`Supprimer « ${x.type} » ?`)) return;
+      a.accessoires = a.accessoires.filter((y) => y !== x); await sauver(); ouvrirArme(a.id);
+    };
+    zone.appendChild(div);
+  });
+}
+
+async function ajouterAccessoire() {
+  const type = lireSelectAutre('accType', 'accTypeAutre');
+  if (!type) { message("Choisis le type d'accessoire."); return; }
+  armeActive.accessoires.push({ id: Date.now(), type, modele: $('accModele').value.trim(), notes: $('accNotes').value.trim(), photo: '' });
   await sauver();
   ouvrirArme(armeActive.id);
 }
@@ -947,16 +1236,14 @@ $('armeRire').addEventListener('change', () => {
 // Munitions
 // =====================================================================
 
-function nomCalibre(id) { const c = CALIBRES.find((x) => x.id === id); return c ? c.nom : ''; }
+function nomCalibre(v) { if (!v || v === 'autre') return ''; const c = CALIBRES.find((x) => x.id === v); return c ? c.nom : v; }
 
 function afficherMunitions() {
-  $('stockCalibre').innerHTML = '<option value="">Calibre…</option>' +
-    CALIBRES.map((c) => `<option value="${c.id}">${html(c.nom)}</option>`).join('');
+  remplirCalibres('stockCalibre', 'stockCalibreAutre', '');
   const zone = $('listeStock');
   zone.innerHTML = '';
   if (!munitions.length) zone.innerHTML = '<div class="vide">Aucune munition enregistrée.</div>';
   [...munitions].sort((a, b) => (nomCalibre(a.calibre) + a.nom).localeCompare(nomCalibre(b.calibre) + b.nom)).forEach((m) => {
-    const imgCal = imageCalibre(m.calibre);
     const div = document.createElement('div');
     div.className = 'carte stock';
     div.innerHTML = `
@@ -967,11 +1254,12 @@ function afficherMunitions() {
         </div>
         <button class="qte">${parseInt(m.quantite, 10) || 0}</button>
       </div>
-      ${imgCal ? `<img class="calibreImg" src="${imgCal}" alt="">` : ''}
       ${m.photo ? '<img class="photoStock" alt="">' : ''}
       <div class="boutons">
         <button class="moins" data-d="-50">−50</button>
         <button class="moins" data-d="-10">−10</button>
+        <button class="moins" data-d="-1">−1</button>
+        <button class="plus" data-d="1">+1</button>
         <button class="plus" data-d="10">+10</button>
         <button class="plus" data-d="50">+50</button>
       </div>
@@ -980,7 +1268,8 @@ function afficherMunitions() {
         <button class="lienPetit btnGalerieStock">&#128444;&#65039; Galerie</button>
         <button class="lienPetit btnCalibreStock">Calibre</button>
         <button class="lienPetit btnSupprStock">Supprimer</button>
-      </div>`;
+      </div>
+      <div class="zoneCal formStock cache"></div>`;
     if (m.photo) {
       const img = div.querySelector('.photoStock');
       afficherImage(img, m.photo);
@@ -1002,14 +1291,14 @@ function afficherMunitions() {
     };
     div.querySelector('.btnPhotoStock').onclick = () => imageMunition(m, 'photo');
     div.querySelector('.btnGalerieStock').onclick = () => imageMunition(m, 'galerie');
-    div.querySelector('.btnCalibreStock').onclick = async () => {
-      const liste = CALIBRES.map((c, i) => `${i + 1}. ${c.nom}`).join('\n');
-      const rep = prompt(`Numéro du calibre :\n${liste}`, String(Math.max(1, CALIBRES.findIndex((c) => c.id === m.calibre) + 1)));
-      const i = parseInt(rep, 10) - 1;
-      if (isNaN(i) || !CALIBRES[i]) return;
-      m.calibre = CALIBRES[i].id;
-      await sauver();
-      afficherMunitions();
+    div.querySelector('.btnCalibreStock').onclick = () => {
+      const z = div.querySelector('.zoneCal');
+      z.classList.toggle('cache');
+      if (z.classList.contains('cache')) return;
+      const idS = 'cal' + m.id, idT = 'calT' + m.id;
+      z.innerHTML = `<select id="${idS}"></select><input type="text" id="${idT}" class="cache champAutre" placeholder="Écris le calibre"><button class="petit okCal">OK</button>`;
+      remplirCalibres(idS, idT, m.calibre);
+      z.querySelector('.okCal').onclick = async () => { m.calibre = lireSelectAutre(idS, idT); await sauver(); afficherMunitions(); };
     };
     div.querySelector('.btnSupprStock').onclick = async () => {
       if (!confirm(`Supprimer « ${m.nom} » du stock ?`)) return;
@@ -1034,7 +1323,7 @@ async function imageMunition(m, source) {
 }
 
 async function ajouterMunition() {
-  const calibre = $('stockCalibre').value;
+  const calibre = lireSelectAutre('stockCalibre', 'stockCalibreAutre');
   let nom = $('stockNom').value.trim();
   const qte = parseInt($('stockQte').value, 10) || 0;
   if (!nom && !calibre) { message('Indique le calibre ou le nom de la munition.'); return; }
@@ -1048,7 +1337,6 @@ async function ajouterMunition() {
   }
   $('stockNom').value = '';
   $('stockQte').value = '';
-  $('stockCalibre').value = '';
   await sauver();
   afficherMunitions();
 }
@@ -1240,11 +1528,10 @@ function afficherLicence() {
   $('certificatFin').value = licence.certificatFin || '';
   $('btnNumeroGrand').textContent = licence.numero || '—';
   [['imageLicence', 'image', 'btnChoisirLicence', "l'image de ma licence"],
-   ['imageCertificat', 'certificatImage', 'btnChoisirCertificat', "l'image du certificat"]].forEach(([idImg, cle, idBtn, texte]) => {
+   ['imageCertificat', 'certificatImage', 'btnChoisirCertificat', "l'image du certificat"]].forEach(([idImg, cle]) => {
     const img = $(idImg);
     if (licence[cle]) { img.classList.remove('cache'); afficherImage(img, licence[cle]); img.onclick = () => voirPhoto(licence[cle]); }
     else img.classList.add('cache');
-    $(idBtn).innerHTML = licence[cle] ? "&#128444;&#65039; Changer l'image" : `&#128444;&#65039; Choisir ${texte}`;
   });
   montrer('licence');
 }
@@ -1259,10 +1546,14 @@ async function enregistrerLicence() {
   message('Enregistré');
 }
 
-async function choisirImageDocument(cle, chemin) {
+async function choisirImageDocument(cle, chemin, mode) {
   if (sansNatif()) return;
   try {
-    if (!(await obtenirImage('galerie', chemin))) return;
+    if (mode === 'fichier') {
+      const f = await choisirFichier();
+      if (!f) return;
+      chemin = await enregistrerFichier(f, chemin.replace(/\.jpg$/, '') + '_' + Date.now());
+    } else if (!(await obtenirImage('galerie', chemin))) return;
     licence[cle] = chemin;
     await sauver();
     afficherLicence();
@@ -1282,16 +1573,22 @@ function numeroEnGrand() {
 // =====================================================================
 
 function nomCategoriePapier(id) { const c = CATEGORIES_PAPIERS.find((x) => x.id === id); return c ? c.nom : 'Autre'; }
+function nomCategorieDuPapier(p) { return p.categorie === 'autre' && p.categorieTexte ? p.categorieTexte : nomCategoriePapier(p.categorie); }
 
 function afficherPapiers() {
   const zone = $('listePapiers');
   zone.innerHTML = '';
   if (!papiers.length) zone.innerHTML = '<div class="vide">Aucun papier pour le moment.</div>';
+  const groupes = [];
   CATEGORIES_PAPIERS.forEach((cat) => {
-    const liste = papiers.filter((p) => p.categorie === cat.id);
+    if (cat.id !== 'autre') { groupes.push({ cat, nom: cat.nom, liste: papiers.filter((p) => p.categorie === cat.id) }); return; }
+    const autres = papiers.filter((p) => p.categorie === 'autre' || !CATEGORIES_PAPIERS.some((c) => c.id === p.categorie));
+    [...new Set(autres.map((p) => p.categorieTexte || 'Autre'))].forEach((nom) => groupes.push({ cat, nom, liste: autres.filter((p) => (p.categorieTexte || 'Autre') === nom) }));
+  });
+  groupes.forEach(({ cat, nom, liste }) => {
     if (!liste.length) return;
     const titre = document.createElement('h2');
-    titre.textContent = cat.nom;
+    titre.textContent = nom;
     zone.appendChild(titre);
     liste.forEach((p) => {
       const j = p.fin ? joursAvant(p.fin) : null;
@@ -1323,8 +1620,8 @@ function texteRappel() {
 function ouvrirFormulairePapier(modifier) {
   papierEnModification = modifier;
   const p = modifier && papierActif ? papierActif : { categorie: 'armes', titre: '', fin: '', notes: '' };
-  $('papierCategorie').innerHTML = CATEGORIES_PAPIERS.map((c) => `<option value="${c.id}">${html(c.nom)}</option>`).join('');
-  $('papierCategorie').value = p.categorie;
+  remplirSelectAutre('papierCategorie', 'papierCategorieAutre', CATEGORIES_PAPIERS.filter((c) => c.id !== 'autre'), p.categorie === 'autre' ? (p.categorieTexte || 'autre') : p.categorie);
+  $('papierCategorie').onchangeSuite = texteRappel;
   $('papierTitre').value = p.titre;
   $('papierFin').value = p.fin;
   $('papierNotes').value = p.notes;
@@ -1334,7 +1631,8 @@ function ouvrirFormulairePapier(modifier) {
 
 async function enregistrerPapier() {
   const valeurs = {
-    categorie: $('papierCategorie').value,
+    categorie: $('papierCategorie').value || 'armes',
+    categorieTexte: $('papierCategorie').value === 'autre' ? $('papierCategorieAutre').value.trim() : '',
     titre: $('papierTitre').value.trim(),
     fin: $('papierFin').value,
     notes: $('papierNotes').value.trim()
@@ -1352,8 +1650,8 @@ function ouvrirPapier(id) {
   papierEnModification = false;
   const p = papierActif;
   $('resumePapier').innerHTML = `
-    <div class="haut">${html(p.titre || nomCategoriePapier(p.categorie))}</div>
-    <div class="bas">${html(nomCategoriePapier(p.categorie))}</div>
+    <div class="haut">${html(p.titre || nomCategorieDuPapier(p))}</div>
+    <div class="bas">${html(nomCategorieDuPapier(p))}</div>
     ${p.fin ? `<div class="bas">Valable jusqu'au ${dateFr(p.fin)}</div>` : ''}
     ${p.notes ? `<div class="notes">${html(p.notes)}</div>` : ''}`;
   const grille = $('grillePapier');
@@ -1372,8 +1670,15 @@ async function documentPapier(source) {
   if (sansNatif()) return;
   const p = papierActif;
   try {
-    const nom = `Papiers/${nettoyer(p.titre || p.categorie) || 'Papier'}_${Date.now()}.jpg`;
-    if (!(await obtenirImage(source, nom))) return;
+    let nom = `Papiers/${nettoyer(p.titre || p.categorie) || 'Papier'}_${Date.now()}`;
+    if (source === 'fichier') {
+      const f = await choisirFichier();
+      if (!f) return;
+      nom = await enregistrerFichier(f, nom);
+    } else {
+      nom += '.jpg';
+      if (!(await obtenirImage(source, nom))) return;
+    }
     p.docs.push(nom);
     await sauver();
     ouvrirPapier(p.id);
@@ -1389,6 +1694,61 @@ async function supprimerPapier() {
   await sauver();
   await programmerRappels();
   afficherPapiers();
+}
+
+// =====================================================================
+// Bloc-notes (codes de porte, infos…)
+// =====================================================================
+
+function afficherNotes() {
+  const zone = $('listeNotes');
+  zone.innerHTML = notesBloc.length ? '' : '<div class="vide">Aucune note pour le moment.</div>';
+  const stands = tousLesStands();
+  [...notesBloc].sort((a, b) => (a.titre || '').localeCompare(b.titre || '')).forEach((n) => {
+    const stand = stands.find((s) => s.id === n.standId);
+    const visible = !n.secret || notesVisibles.has(n.id);
+    const div = document.createElement('div');
+    div.className = 'carte note';
+    div.innerHTML = `
+      <div class="haut">${n.secret ? '&#128274; ' : ''}${html(n.titre || 'Note')}</div>
+      ${stand ? `<div class="bas">${html(stand.nom)}</div>` : ''}
+      <div class="texteNote ${visible ? '' : 'masque'}">${visible ? html(n.texte) : '•••••• (appuie pour voir)'}</div>
+      <button class="lienPetit btnModifNote">Modifier</button>`;
+    div.onclick = () => { if (!n.secret) return; if (notesVisibles.has(n.id)) notesVisibles.delete(n.id); else notesVisibles.add(n.id); afficherNotes(); };
+    div.querySelector('.btnModifNote').onclick = (e) => { e.stopPropagation(); ouvrirFormulaireNote(n); };
+    zone.appendChild(div);
+  });
+  if (ecran !== 'notes') montrer('notes');
+}
+
+function ouvrirFormulaireNote(n) {
+  noteActive = n || null;
+  const v = n || { titre: '', standId: '', texte: '', secret: false };
+  $('noteTitre').value = v.titre;
+  $('noteStand').innerHTML = '<option value="">— aucun —</option>' + tousLesStands().map((s) => `<option value="${html(s.id)}">${html(s.nom)}</option>`).join('');
+  $('noteStand').value = v.standId || '';
+  $('noteTexte').value = v.texte;
+  $('noteSecret').checked = !!v.secret;
+  $('btnSupprimerNote').classList.toggle('cache', !n);
+  montrer('noteform');
+}
+
+async function enregistrerNote() {
+  const v = { titre: $('noteTitre').value.trim(), standId: $('noteStand').value, texte: $('noteTexte').value, secret: $('noteSecret').checked };
+  if (!v.titre && !v.texte.trim()) { message('Écris un titre ou une note.'); return; }
+  if (noteActive) Object.assign(noteActive, v);
+  else notesBloc.push(Object.assign({ id: Date.now() }, v));
+  await sauver();
+  noteActive = null;
+  afficherNotes();
+}
+
+async function supprimerNote() {
+  if (!noteActive || !confirm('Supprimer cette note ?')) return;
+  notesBloc = notesBloc.filter((n) => n !== noteActive);
+  noteActive = null;
+  await sauver();
+  afficherNotes();
 }
 
 // =====================================================================
@@ -1430,6 +1790,8 @@ function restaurerSauvegarde(fichier) {
       controles = (d.controles || []).filter((c) => !String(c.id).startsWith('base-'));
       licence = Object.assign({ numero: '', fin: '', image: '', certificatFin: '', certificatImage: '' }, d.licence || {});
       papiers = d.papiers || [];
+      notesBloc = d.notes || [];
+      lierTirsAuxArmes();
       await sauver();
       await programmerRappels();
       message('Sauvegarde restaurée');
@@ -1598,9 +1960,18 @@ function afficherApprendre() {
           <dt>${html(terme)}</dt>
           ${img ? `<dd class="dessin"><img src="images/calibres/${img}.svg" alt=""></dd>` : ''}
           <dd>${html(def)}${lien ? ` <a href="${lien}" target="_blank" rel="noopener">Service-public.fr →</a>` : ''}</dd>`).join('')}
-        </dl>`;
+        </dl>${section.html || ''}`;
       zone.appendChild(d);
     });
+    const calc = () => {
+      const dist = parseFloat($('ccDistance').value), ecart = parseFloat(String($('ccEcart').value).replace(',', '.'));
+      if (!(dist > 0) || !(ecart > 0)) { $('ccResultat').textContent = ''; return; }
+      const v = $('ccClic').value;
+      const cmParClic = v.startsWith('m') ? parseFloat(v.slice(1)) * 10 * dist / 100 : parseFloat(v) * 2.909 * dist / 100;
+      const n = ecart / cmParClic;
+      $('ccResultat').textContent = `≈ ${Math.round(n)} clics (1 clic = ${String(Math.round(cmParClic * 100) / 100).replace('.', ',')} cm à ${dist} m)`;
+    };
+    ['ccDistance', 'ccEcart', 'ccClic'].forEach((id) => { $(id).oninput = calc; $(id).onchange = calc; });
   }
   montrer('apprendre');
 }
@@ -1624,6 +1995,7 @@ document.querySelectorAll('.tuile').forEach((t) => {
       case 'apprendre': afficherApprendre(); break;
       case 'papiers': afficherPapiers(); break;
       case 'jeu': ouvrirJeu(); break;
+      case 'notes': afficherNotes(); break;
       case 'infos': depuisMenu = true; montrer('infos'); break;
       default: message('Cette partie arrive bientôt.');
     }
@@ -1646,6 +2018,10 @@ $('btnGalerieArme').onclick = () => imageArme('galerie');
 $('btnAjoutModif').onclick = () => ajouterJournal('modifs');
 $('btnAjoutEntretien').onclick = () => ajouterJournal('entretiens');
 $('btnSupprimerArme').onclick = supprimerArme;
+$('btnAjoutAcc').onclick = ajouterAccessoire;
+$('btnNouvelleNote').onclick = () => ouvrirFormulaireNote(null);
+$('btnEnregistrerNote').onclick = enregistrerNote;
+$('btnSupprimerNote').onclick = supprimerNote;
 
 $('btnAjoutStock').onclick = ajouterMunition;
 
@@ -1662,10 +2038,13 @@ $('btnProposerControles').onclick = proposerControles;
 $('btnEnregistrerLicence').onclick = enregistrerLicence;
 $('btnChoisirLicence').onclick = () => choisirImageDocument('image', 'Papiers/licence.jpg');
 $('btnChoisirCertificat').onclick = () => choisirImageDocument('certificatImage', 'Papiers/certificat-medical.jpg');
+$('btnFichierLicence').onclick = () => choisirImageDocument('image', 'Papiers/licence.jpg', 'fichier');
+$('btnFichierCertificat').onclick = () => choisirImageDocument('certificatImage', 'Papiers/certificat-medical.jpg', 'fichier');
 $('btnNumeroGrand').onclick = numeroEnGrand;
 $('grandNumero').onclick = () => $('grandNumero').classList.add('cache');
 
 $('visionneuse').onclick = () => $('visionneuse').classList.add('cache');
+$('btnTourner').onclick = (e) => { e.stopPropagation(); $('visionneuse').classList.toggle('tourne'); };
 
 if (natif && P.App) {
   P.App.addListener('backButton', () => { if (!retour()) P.App.exitApp(); });
@@ -1695,8 +2074,8 @@ $('btnEnregistrerPapier').onclick = enregistrerPapier;
 $('btnModifierPapier').onclick = () => ouvrirFormulairePapier(true);
 $('btnPhotoPapier').onclick = () => documentPapier('photo');
 $('btnGaleriePapier').onclick = () => documentPapier('galerie');
+$('btnFichierPapier').onclick = () => documentPapier('fichier');
 $('btnSupprimerPapier').onclick = supprimerPapier;
-$('papierCategorie').onchange = texteRappel;
 
 async function afficherVersion() {
   let v = '';
@@ -1705,6 +2084,7 @@ async function afficherVersion() {
 }
 
 afficherVersion();
+lierTirsAuxArmes();
 verifierAccord();
 if (charger(CLES.accord, null)) programmerRappels();
 montrer('accueil');

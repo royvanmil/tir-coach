@@ -42,12 +42,13 @@
       <button class="tuile" data-va="ratelier"><span>&#128452;&#65039;</span>Mon râtelier</button>
       <button class="tuile" data-va="munitions"><span>&#128230;</span>Munitions</button>
       <button class="tuile" data-va="stands"><span>&#128197;</span>Stands &amp; ouvertures</button>
-      <button class="tuile" data-va="controles"><span>&#9989;</span>Tirs de contrôle</button>
+      <button class="tuile" data-va="controles"><span>&#9989;</span>Dates tirs de contrôle</button>
       <button class="tuile" data-va="licence"><span>&#129706;</span>Licence &amp; certificat</button>
       <button class="tuile" data-va="demarches"><span>&#127963;&#65039;</span>Démarches</button>
       <button class="tuile" data-va="apprendre"><span>&#127891;</span>Apprendre</button>
       <button class="tuile" data-va="papiers"><span>&#128193;</span>Mes papiers</button>
-      <button class="tuile" data-va="jeu"><span>&#127919;</span>Jeu de précision</button>
+      <button class="tuile" data-va="notes"><span>&#128221;</span>Bloc-notes</button>
+      <button class="tuile large" data-va="jeu"><span>&#127919;</span>Jeu de précision</button>
       <button class="tuile large" data-va="infos"><span>&#8505;&#65039;</span>Infos &amp; avis</button>
     </div>
     <p class="info">Tout reste sur ton téléphone.<br>Photos et sauvegarde : <b>Documents/TirCoach</b></p>
@@ -74,10 +75,6 @@
       <div class="etiquette">Note de la séance (1 à 10)</div>
       <div id="choixNote" class="notes10"></div>
     </div>
-    <label class="caseACocher">
-      <input type="checkbox" id="champControle">
-      <span>Tir contrôlé (noté au registre du club)</span>
-    </label>
     <label>Notes
       <textarea id="champNotes" rows="3" placeholder="Ressenti, météo, réglages…"></textarea>
     </label>
@@ -94,8 +91,13 @@
 
   <main id="ecranTirForm" class="cache">
     <label>Arme
-      <input type="text" id="tirArme" list="listeArmes" placeholder="ex. Glock 17">
+      <select id="tirArmeChoix"></select>
+      <input type="text" id="tirArme" list="listeArmes" class="champAutre" placeholder="Nom de l'arme — ex. Glock 17">
       <datalist id="listeArmes"></datalist>
+    </label>
+    <label>Calibre
+      <select id="tirCalibre"></select>
+      <input type="text" id="tirCalibreAutre" class="cache champAutre" placeholder="Écris le calibre">
     </label>
     <label>Munitions (marque, type)
       <input type="text" id="tirMunition" list="listeMunitions" placeholder="ex. Geco 9 mm FMJ 124 gr">
@@ -114,8 +116,12 @@
         <option>C50</option>
         <option>C200</option>
         <option>TAR</option>
-        <option>Autre</option>
+        <option value="autre">Autre…</option>
       </select>
+      <input type="text" id="tirCibleAutre" class="cache champAutre" placeholder="Écris la cible">
+    </label>
+    <label id="zoneStock">Déduire du stock
+      <select id="tirStock"></select>
     </label>
     <button id="btnEnregistrerTir" class="gros">Enregistrer</button>
     <button id="btnSupprimerTir" class="discret">Retirer cette arme de la séance</button>
@@ -131,6 +137,9 @@
     <label>Nom de l'arme
       <input type="text" id="armeNom" placeholder="ex. Glock 17 Gen5">
     </label>
+    <label>Signe distinctif <small class="aide">(si tu as plusieurs armes pareilles)</small>
+      <input type="text" id="armeDistinctif" placeholder="ex. noir, V2, neuf, le vieux…">
+    </label>
     <div class="ligne2">
       <label>Catégorie
         <select id="armeCategorie">
@@ -142,10 +151,11 @@
           <option>D</option>
         </select>
       </label>
-      <label>Calibre
-        <input type="text" id="armeCalibre" placeholder="ex. 9 mm">
-      </label>
     </div>
+    <label>Calibre
+      <select id="armeCalibre"></select>
+      <input type="text" id="armeCalibreAutre" class="cache champAutre" placeholder="Écris le calibre">
+    </label>
     <label id="zoneRire" class="cache">Armes de catégorie A
       <select id="armeRire"></select>
     </label>
@@ -166,6 +176,18 @@
       <button id="btnGalerieArme" class="gros">&#128444;&#65039; Galerie</button>
     </div>
     <div id="grillePhotosArme" class="grille"></div>
+
+    <h2>Accessoires</h2>
+    <p class="aide">Red dot, lunette, détente allégée, silencieux…</p>
+    <div id="listeAccessoires" class="liste"></div>
+    <div class="carte formStock">
+      <div class="haut">Ajouter un accessoire</div>
+      <select id="accType"></select>
+      <input type="text" id="accTypeAutre" class="cache champAutre" placeholder="Quel accessoire ?">
+      <input type="text" id="accModele" placeholder="Marque, modèle — ex. Holosun 507C">
+      <input type="text" id="accNotes" placeholder="Notes : réglage, date… (facultatif)">
+      <button id="btnAjoutAcc" class="gros">Ajouter</button>
+    </div>
 
     <h2>Modifications</h2>
     <p class="aide">Organes de visée, détente, poignée…</p>
@@ -195,6 +217,7 @@
     <div class="carte formStock">
       <div class="haut">Ajouter une munition</div>
       <select id="stockCalibre"></select>
+      <input type="text" id="stockCalibreAutre" class="cache champAutre" placeholder="Écris le calibre">
       <input type="text" id="stockNom" placeholder="Marque, type — ex. Geco FMJ 124 gr">
       <input type="number" id="stockQte" inputmode="numeric" placeholder="Quantité">
       <button id="btnAjoutStock" class="gros">Ajouter</button>
@@ -240,7 +263,7 @@
 
   <!-- ===== TIRS DE CONTRÔLE ===== -->
   <main id="ecranControles" class="cache">
-    <p class="aide">Les dates des tirs de contrôle organisés par ton stand, pour info. Le stand choisi reste affiché la prochaine fois.</p>
+    <p class="aide">Les dates des tirs de contrôle organisés par ton stand, juste pour info. Tes séances, tu les notes dans le Carnet de tir. Le stand choisi reste affiché la prochaine fois.</p>
     <label>Stand
       <select id="controleStand"></select>
     </label>
@@ -258,6 +281,12 @@
   <main id="ecranLicence" class="cache">
     <button id="btnNumeroGrand" class="numeroLicence">—</button>
     <p class="aide centre">Appuie sur le numéro pour l'afficher en grand.</p>
+    <img id="imageLicence" class="imageLicence cache" alt="Licence">
+    <div class="deuxBoutons">
+      <button id="btnChoisirLicence" class="gros">&#128444;&#65039; Image</button>
+      <button id="btnFichierLicence" class="gros">&#128196; PDF</button>
+    </div>
+    <p class="aide">Ta licence : télécharge-la sur EDEN (eden.fftir.org), en image ou en PDF. Appuie dessus pour l'afficher en grand.</p>
     <label>Numéro de licence
       <input type="text" id="licenceNumero" inputmode="numeric" placeholder="ex. 1234567">
     </label>
@@ -269,19 +298,43 @@
     </label>
     <p class="aide">Tu recevras une notification 2 mois puis 1 mois avant chaque date.</p>
     <button id="btnEnregistrerLicence" class="gros">Enregistrer</button>
-    <h2>Image de la licence</h2>
-    <p class="aide">Télécharge ta licence sur EDEN (eden.fftir.org), fais une capture ou garde l'image dans ta galerie, puis choisis-la ici.</p>
-    <img id="imageLicence" class="imageLicence cache" alt="Licence">
-    <button id="btnChoisirLicence" class="gros">&#128444;&#65039; Choisir l'image de ma licence</button>
     <h2>Certificat médical</h2>
     <img id="imageCertificat" class="imageLicence cache" alt="Certificat médical">
-    <button id="btnChoisirCertificat" class="gros">&#128444;&#65039; Choisir l'image du certificat</button>
+    <div class="deuxBoutons">
+      <button id="btnChoisirCertificat" class="gros">&#128444;&#65039; Image</button>
+      <button id="btnFichierCertificat" class="gros">&#128196; PDF</button>
+    </div>
   </main>
 
   <!-- ===== APPRENDRE ===== -->
   <main id="ecranApprendre" class="cache">
     <p class="aide">Les bases du tir sportif, en bref. Appuie sur un thème pour l'ouvrir.</p>
     <div id="listeApprendre" class="liste"></div>
+  </main>
+
+  <!-- ===== BLOC-NOTES ===== -->
+  <main id="ecranNotes" class="cache">
+    <p class="aide">Tes notes : codes de porte ou d'accès des stands, infos utiles… Les notes masquées s'affichent quand tu appuies dessus.</p>
+    <div id="listeNotes" class="liste"></div>
+    <button id="btnNouvelleNote" class="gros">+ Nouvelle note</button>
+  </main>
+
+  <main id="ecranNoteForm" class="cache">
+    <label>Titre
+      <input type="text" id="noteTitre" placeholder="ex. Code portail du stand">
+    </label>
+    <label>Stand (facultatif)
+      <select id="noteStand"></select>
+    </label>
+    <label>Note
+      <textarea id="noteTexte" rows="5" placeholder="ex. Portail : 1234 — Club-house : 5678"></textarea>
+    </label>
+    <label class="caseACocher">
+      <input type="checkbox" id="noteSecret">
+      <span>Masquer (code, mot de passe)</span>
+    </label>
+    <button id="btnEnregistrerNote" class="gros">Enregistrer</button>
+    <button id="btnSupprimerNote" class="discret">Supprimer cette note</button>
   </main>
 
   <!-- ===== MES PAPIERS ===== -->
@@ -294,6 +347,7 @@
   <main id="ecranPapierForm" class="cache">
     <label>Catégorie
       <select id="papierCategorie"></select>
+      <input type="text" id="papierCategorieAutre" class="cache champAutre" placeholder="Écris la catégorie">
     </label>
     <label>Titre
       <input type="text" id="papierTitre" placeholder="ex. Autorisation Glock 17">
@@ -311,11 +365,12 @@
   <main id="ecranPapier" class="cache">
     <div id="resumePapier" class="carte"></div>
     <button id="btnModifierPapier" class="discret">Modifier</button>
-    <div class="deuxBoutons">
+    <div class="troisBoutons">
       <button id="btnPhotoPapier" class="gros">&#128247; Photo</button>
       <button id="btnGaleriePapier" class="gros">&#128444;&#65039; Galerie</button>
+      <button id="btnFichierPapier" class="gros">&#128196; PDF</button>
     </div>
-    <p class="aide">Ajoute le papier, la facture ou tout autre document.</p>
+    <p class="aide">Ajoute le papier, la facture ou tout autre document (photo, image ou PDF).</p>
     <div id="grillePapier" class="grille"></div>
     <button id="btnSupprimerPapier" class="discret">Supprimer ce papier</button>
   </main>
@@ -425,9 +480,12 @@
     </div>
   </div>
   <div id="visionneuse" class="cache">
+    <button id="btnTourner" class="tourner" aria-label="Tourner">&#10227;</button>
     <img id="imageGrande" alt="">
+    <div id="pagesPdf" class="cache"></div>
     <p id="nomGrand"></p>
   </div>
+  <input type="file" id="choixFichier" accept="image/*,application/pdf,.pdf" class="cache">
 
   <!-- Numéro de licence en grand -->
   <div id="grandNumero" class="cache">
